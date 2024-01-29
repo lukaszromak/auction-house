@@ -35,3 +35,4 @@ build/
 ### Frontend ###
 /front/node_modules
 /front/build
+.env

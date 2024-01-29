@@ -147,7 +147,7 @@ function ItemPage() {
                 {item.description.length === 0 ? "No description provided." : <p>item.description</p>}
                 <h2 className="mt-5">Additional Info</h2>
                 <Row>
-                    <p>Categories: {item.itemCategory.name}</p>
+                    <p>Categories: {item.itemCategory && item.itemCategory.name}</p>
                 </Row>
                 <Row>
                     <p>Producers: {JSON.stringify(item.itemProducers)}</p>

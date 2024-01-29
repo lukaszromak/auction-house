@@ -9,7 +9,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-@Component
+
 public class SpaWebFilter extends OncePerRequestFilter {
 
     @Override
