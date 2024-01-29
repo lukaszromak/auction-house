@@ -5,6 +5,7 @@ import com.lukasz.auctionhouse.domain.User;
 import com.lukasz.auctionhouse.exception.Item.ItemNotFoundException;
 import com.lukasz.auctionhouse.exception.UserNotFoundException;
 import com.lukasz.auctionhouse.service.ItemService;
+import com.lukasz.auctionhouse.service.StorageService;
 import com.lukasz.auctionhouse.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -13,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import com.lukasz.auctionhouse.domain.Item;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 
@@ -24,17 +27,20 @@ public class ItemController {
     private ItemService itemService;
     private UserService userService;
     private BasicAuthUtils basicAuthUtils;
+    private StorageService storageService;
     @Autowired
-    public ItemController(ItemService itemService, UserService userService, BasicAuthUtils basicAuthUtils){
+    public ItemController(ItemService itemService, UserService userService, BasicAuthUtils basicAuthUtils, StorageService storageService){
         this.itemService = itemService;
         this.userService = userService;
         this.basicAuthUtils = basicAuthUtils;
+        this.storageService = storageService;
     }
 
     @Operation(security = {@SecurityRequirement(name = "basicAuth")})
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public Item createItem(@RequestHeader(name = "Authorization") String authData, @Valid @RequestBody Item item){
+    public Item createItem(@RequestHeader(name = "Authorization") String authData,
+                           @Valid @RequestBody Item item){
         String username = basicAuthUtils.getUsernameFromAuthData(authData);
         Optional<User> listingUser = userService.getByUsername(username);
         if(listingUser.isEmpty()){
@@ -45,6 +51,24 @@ public class ItemController {
         // TODO: PRICES VALIDATION
 
         return item;
+    }
+
+    @Operation(security = {@SecurityRequirement(name = "basicAuth")})
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping("/{itemId}/uploadImage")
+    public ResponseEntity uploadItemImage(@PathVariable Long itemId,
+                                          @RequestParam(name = "itemImage") MultipartFile multipartFile) {
+        Optional<Item> itemOptional = itemService.findItem(itemId);
+
+        if(itemOptional.isEmpty()){
+            throw new ItemNotFoundException(String.format("Item with id %d not found", itemId));
+        }
+
+        Item item = itemOptional.get();
+        item.setImagePath(storageService.store(item, multipartFile));
+        itemService.updateItem(item);
+
+        return ResponseEntity.ok(String.format("Successfully uploaded image for item with id %d", itemId));
     }
 
     @GetMapping
@@ -63,12 +87,12 @@ public class ItemController {
         return items;
     }
 
-    @GetMapping("/{id}")
-    public Item getItem(@PathVariable Long id){
-        Optional<Item> item = itemService.findItem(id);
+    @GetMapping("/{itemId}")
+    public Item getItem(@PathVariable Long itemId){
+        Optional<Item> item = itemService.findItem(itemId);
 
         if(item.isEmpty()){
-            throw new ItemNotFoundException(String.format("Item with id %d not found.", id));
+            throw new ItemNotFoundException(String.format("Item with id %d not found.", itemId));
         }
 
         return item.get();

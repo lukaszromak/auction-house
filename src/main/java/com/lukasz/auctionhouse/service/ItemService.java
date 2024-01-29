@@ -60,6 +60,11 @@ public class ItemService {
     }
 
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
+    public void updateItem(Item item){
+        itemRepository.save(item);
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
     public Item buyItem(Long itemId, String username){
         Optional<Item> itemOptional = itemRepository.findById(itemId);
         Optional<User> userOptional = userService.getByUsername(username);

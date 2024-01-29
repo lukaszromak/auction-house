@@ -11,6 +11,10 @@ public class AuctionDurationValidator implements ConstraintValidator<AuctionDura
 
     @Override
     public boolean isValid(Date date, ConstraintValidatorContext constraintValidatorContext) {
+        if(date == null){
+            return false;
+        }
+
         long diff = new Date(date.getTime() - new Date().getTime()).getTime();
 
         return diff > millisInDay;

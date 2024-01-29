@@ -58,6 +58,8 @@ public class Item implements Serializable {
     @JoinColumn(name = "user_id")
     private User listedBy;
 
+    private String imagePath;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "item_category_id")
     private ItemCategory itemCategory;
