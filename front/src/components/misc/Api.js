@@ -14,7 +14,8 @@ export const Api = {
   createItemProducer,
   getItemProducers,
   deleteItemProducer,
-  addItem
+  addItem,
+  uploadItemImage
 }
 
 function authenticate(username, password) {
@@ -117,6 +118,18 @@ function addItem(item, user) {
   return instance.post('items', item, {
     headers: { 
       'Content-type': 'application/json',
+      'Authorization': basicAuth(user)
+    }
+  });
+}
+
+function uploadItemImage(imageFile, itemId, user) {
+  const formData = new FormData();
+  formData.append("imageFile", imageFile)
+
+  return instance.post(`/items/${itemId}/uploadImage`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
       'Authorization': basicAuth(user)
     }
   });

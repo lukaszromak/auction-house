@@ -3,6 +3,7 @@ import { json, useParams } from "react-router-dom";
 import { Button, Container, Row, Col, Image, FormControl, Alert, Figure } from "react-bootstrap";
 import { Api } from "../misc/Api";
 import { useAuth } from "../context/AuthContext";
+import { config } from "./ImageUrl";
 
 function ItemPage() {
     const Auth = useAuth();
@@ -101,7 +102,7 @@ function ItemPage() {
                     <h1>{item.name}</h1>
                     <Figure>
                         <Figure.Image fluid
-                        src={require("./dog.jpg")}/>
+                        src={item.imagePath ? `${config.url.IMAGE_BASE_URL}${item.imagePath}` : require("./nophoto.jpg")}/>
                         <Figure.Caption>
                             listed by {item.listedBy && item.listedBy.username}
                         </Figure.Caption>

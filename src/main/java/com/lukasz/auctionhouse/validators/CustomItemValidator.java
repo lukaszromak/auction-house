@@ -17,7 +17,10 @@ public class CustomItemValidator implements Validator {
         ValidationUtils.rejectIfEmpty(errors, "currentPrice", "Empty.currentPrice.field");
         Item item = (Item) target;
         if(item.getStartPrice() >= item.getBuyItNowPrice()){
-            errors.rejectValue("buyItNowPrice","Item.Prices.Equal", "Auction start price cannot be higher or equal than buy it now price");
+            errors.rejectValue("buyItNowPrice","Item.Prices.Equal", "Auction start price cannot be higher or equal than buy it now price.");
+        }
+        if(item.getStartPrice() == null && item.getBuyItNowPrice() == null){
+            errors.rejectValue("getStartPrice", "No.Price.Set", "Either start price or buy it now price has to be set.");
         }
     }
 }

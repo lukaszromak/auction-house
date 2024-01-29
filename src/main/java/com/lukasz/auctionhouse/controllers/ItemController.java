@@ -47,8 +47,10 @@ public class ItemController {
             throw new UserNotFoundException(String.format("User with name %s not found.", username));
         }
 
+        System.out.println(item);
+        System.out.println(listingUser.get());
         Item savedItem = itemService.saveItem(item, listingUser.get());
-        // TODO: PRICES VALIDATION
+        item.setId(savedItem.getId());
 
         return item;
     }
@@ -57,7 +59,7 @@ public class ItemController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/{itemId}/uploadImage")
     public ResponseEntity uploadItemImage(@PathVariable Long itemId,
-                                          @RequestParam(name = "itemImage") MultipartFile multipartFile) {
+                                          @RequestParam("imageFile") MultipartFile multipartFile) {
         Optional<Item> itemOptional = itemService.findItem(itemId);
 
         if(itemOptional.isEmpty()){

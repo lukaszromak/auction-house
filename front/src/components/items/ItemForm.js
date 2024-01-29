@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Form, Button, Container } from "react-bootstrap";
+import { Form, Button, Container, Alert } from "react-bootstrap";
 import { Navigate, useNavigate } from "react-router-dom";
 import { MultiSelect } from "react-multi-select-component";
 import { useAuth } from "../context/AuthContext";
 import { Api } from "../misc/Api";
 import { handleGetCategories, handleGetProducers } from "../misc/ItemHelpers";
+import { responsivePropType } from "react-bootstrap/esm/createUtilityClasses";
 
 function ItemForm() {
     const Auth = useAuth();
@@ -19,16 +20,26 @@ function ItemForm() {
     const [itemCategory, setItemCategory] = useState({});
     const [itemCategories, setItemCategories] = useState([]);
     const [itemProducers, setItemProducers] = useState([]);
+    const [imageFile, setImageFile] = useState('');
     const [availableItemProducers, setAvailableItemProducers] = useState([]);
     const [failedToAdd, setFailedToAdd] = useState(false);
+    const [failedToAddMessage, setFailedToAddMessage] = useState("");
     const [isPending, setIsPending] = useState(false);
 
-    const handleSubmit = async (event) => {
-        setIsPending(true)
+    const handleSubmit = (event) => {
         event.preventDefault();
         event.stopPropagation();
-        setValidated(true);
+        const form = event.currentTarget;
 
+        if(form.checkValidity() === false){
+            setValidated(true);
+        } else {
+            setIsPending(true);
+            handleAddItem();
+        }
+    }
+
+    const handleAddItem = async () => {
         let item = {}
         item.name = name;
         item.startPrice = startPrice;
@@ -39,11 +50,26 @@ function ItemForm() {
         item.itemProducers = itemProducers.map(itemProducer => (
             { id: itemProducer.value, name: itemProducer.name }
         ));
+
+        let responseAddItem = null;
         try {
-            await Api.addItem(item, user);
+            responseAddItem = await Api.addItem(item, user);
+            const savedItemId = responseAddItem.data.id;
+            if(imageFile) {
+                await Api.uploadItemImage(imageFile, savedItemId, user);
+            }
             navigate("/items");
         } catch(error) {
-            setFailedToAdd(true);
+            if(responseAddItem && responseAddItem.status === 201){
+                navigate("/items");
+            } else {
+                if(error.response && error.response.data){
+                    setFailedToAddMessage(error.response.data.message);
+                } else {
+                    setFailedToAddMessage("Failed to add item.");
+                }
+                setFailedToAdd(true);
+            }
         } finally {
             setIsPending(false);
         }
@@ -53,23 +79,26 @@ function ItemForm() {
         const name = e.target.name;
         const value = e.target.value
 
-        if(name === "name"){
+        if(name === "name") {
             setName(value);
-        } else if(name === "buyItNowPrice"){
+        } else if(name === "buyItNowPrice") {
             setbuyItNowPrice(value)
-        } else if(name === "startPrice"){
+        } else if(name === "startPrice") {
             setStartPrice(value);
-        }
-         else if(name === "description"){
+        } else if(name === "description") {
             setDescription(value)
-        } else if(name === "expirationDate"){
+        } else if(name === "expirationDate") {
             setexpirationDate(value)
-        } else if(name === "itemCategory"){
+        } else if(name === "itemCategory") {
             setItemCategory({ id: value.split(";")[0], name: value.split(";")[1] })
+        } else if(name === "imageFile") {
+            console.log(e.target.files[0])
+            setImageFile(e.target.files[0])
         }
     }
 
     useEffect(() => {
+        console.log("effect");
         handleGetCategories(setItemCategories);
         handleGetProducers(setAvailableItemProducers);
     }, [])
@@ -160,9 +189,16 @@ function ItemForm() {
                         labelledBy="Select"
                         hasSelectAll={false}/>
                 </Form.Group>
+                <Form.Group>
+                    <Form.Label>Item image (optional)</Form.Label>
+                    <Form.Control
+                        type="file"
+                        name="imageFile"
+                        onChange={(e) => handleInputChange(e)}/>
+                </Form.Group>
                 <Button type="submit" disabled={isPending}>Add item</Button>
             </Form>
-            {!failedToAdd ? "" : "Failed to add item."}
+            {!failedToAdd ? "" : <Alert variant="danger">{failedToAddMessage}</Alert>}
         </Container>
     );
 }
