@@ -1,6 +1,7 @@
 import { useAuth } from "./context/AuthContext"
-import { Container, Row, Image } from "react-bootstrap";
+import { Container, Row, Col, Image } from "react-bootstrap";
 import { useState, useEffect } from "react";
+import PostList from "./posts/PostList";
 
 
 function Home(){
@@ -20,15 +21,20 @@ function Home(){
     }, [])
 
     return (
-        <Container className="d-flex flex-column align-items-center">
+        <Container>
             <Row>
-            {Auth.userIsAuthenticated() ? "" : "Not logged in."}
+            <Col>
+                <PostList
+                    isMod={false}/>
+            </Col>
+            <Col>
+                {/* <h2 className="text-center">{Auth.userIsAuthenticated() ? `Hello ${username}` : "Not logged in."}</h2> */}
+                <Image
+                    className="mt-5"
+                    src="favicon.png"
+                    fluid/>
+            </Col>
             </Row>
-            <Image
-                className="mt-5"
-                src="favicon.png"
-                fluid/>
-            <h1>Hello {username} !</h1>
         </Container>
     )
 }

@@ -8,6 +8,7 @@ export const Api = {
   getItem,
   getBid,
   placeBid,
+  buyItem,
   createItemCategory,
   getItemCategories,
   deleteItemCategory,
@@ -15,7 +16,11 @@ export const Api = {
   getItemProducers,
   deleteItemProducer,
   addItem,
-  uploadItemImage
+  uploadItemImage,
+  getPosts,
+  addPost,
+  deletePost,
+  updatePost
 }
 
 function authenticate(username, password) {
@@ -55,6 +60,15 @@ function getBid(itemId) {
 
 function placeBid(bidRequest, user) {
   return instance.post(`/bids/placeBid`, bidRequest, {
+    headers: {
+      'Content-type': 'application/json',
+      'Authorization': basicAuth(user)
+    }
+  });
+}
+
+function buyItem(itemId, user){
+  return instance.get(`/items/${itemId}/buy`, {
     headers: {
       'Content-type': 'application/json',
       'Authorization': basicAuth(user)
@@ -130,6 +144,39 @@ function uploadItemImage(imageFile, itemId, user) {
   return instance.post(`/items/${itemId}/uploadImage`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
+      'Authorization': basicAuth(user)
+    }
+  });
+}
+
+function getPosts(){
+  return instance.get('/posts', {
+    headers: { 'Content-type': 'application/json' }
+  });
+}
+
+function addPost(post, user){
+  return instance.post('/posts', post, {
+    headers: { 
+      'Content-type': 'application/json',
+      'Authorization': basicAuth(user)
+    }
+  });
+}
+
+function deletePost(postId, user) {
+  return instance.delete(`/posts/${postId}`, {
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': basicAuth(user) 
+    }
+  });
+}
+
+function updatePost(postId, post, user){
+  return instance.put(`/posts/${postId}`, post, {
+    headers: { 
+      'Content-type': 'application/json',
       'Authorization': basicAuth(user)
     }
   });

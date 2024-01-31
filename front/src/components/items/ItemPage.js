@@ -14,6 +14,9 @@ function ItemPage() {
     const [bidNotFound, setBidNotFound] = useState(false);
     const [getBidErrorResponse, setGetBidErrorResponse] = useState("");
     const [placeBidResponse, setPlaceBidResponse] = useState(null);
+    const [buyItemSuccess, setBuyItemSuccess] = useState(false);
+    const [buyItemError, setBuyItemError] = useState("");
+    const [buyItemErrorMessage, setBuyItemErrorMessage] = useState("");
     const [placeBidSuccess, setPlaceBidSuccess] = useState(false);
     const [isNotFound, setIsNotFound] = useState(false);
 
@@ -92,6 +95,27 @@ function ItemPage() {
         }
     }
 
+    const handleBuyItem = async() => {
+        try {
+            if(!Auth.userIsAuthenticated()){
+                setPlaceBidResponse("You need to be logged in to place bid.");
+                return;
+            }
+
+            const user = Auth.getUser();
+            const response = await Api.buyItem(itemId, user);
+            if(response.status === 200){
+                setBuyItemSuccess(true);
+            }
+        } catch(error) {
+            setBuyItemError(true);
+            if(error.response && error.response.data){
+                const errorData = error.response.data;
+                setBuyItemErrorMessage(errorData.message);
+            }
+        }
+    }
+
     return (
         <Container className="p-4">
             {isNotFound && <h1>Sorry, we couldn't find that item.</h1>}
@@ -109,10 +133,15 @@ function ItemPage() {
                     </Figure>
                 </Col>
                 <Col md={6}>
-                    {(bid && item.bought) ?
+                    {
+                    // display info about auction
+                    buyItemSuccess ?
+                    <Alert variant="success">You bought the item.</Alert>
+                    :
+                    (bid && item.status && item.status.name === "BOUGHT_AUCTION") ?
                     <Alert>That item was sold for {bid.currentPrice}zł</Alert> 
                     :
-                    bid ?      
+                    bid && item.status.name === "NOT_BOUGHT" ?      
                     <>           
                         <h3>Current price - {bid.currentPrice}zł</h3>
                         <h4>current winner - {bid.user && bid.user.username}</h4>
@@ -128,15 +157,19 @@ function ItemPage() {
                         <Button className="mt-2" onClick={() => {handlePlaceBid()}}>Bid</Button>
                     </> 
                     :
-                    <Alert>That item has no auction.</Alert>
+                    (!bid && item.status.name === "NOT_BOUGHT") && <Alert>That item has no auction.</Alert>
                     }
-                    {(item.buyItNowPrice && !item.bought) ?
+                    {
+                    // display info about bin
+                    (item.status && item.status.name === "BOUGHT_BIN") ? <Alert>That item was sold for {item.buyItNowPrice}zł</Alert> 
+                    :
+                    (item.buyItNowPrice && item.status.name === "NOT_BOUGHT" && !buyItemSuccess) ?
                     <>
                     <h3>Buy it now price - {item.buyItNowPrice}</h3> 
-                    <Button>Buy</Button>
+                    <Button onClick={handleBuyItem}>Buy</Button>
                     </>
                     :
-                    (!item.buyItNowPrice && !item.bought) ?
+                    (!item.buyItNowPrice && item.status.name === "NOT_BOUGHT") ?
                     <Alert className="mt-2">This item has no buy it now option.</Alert> 
                     :
                     ""

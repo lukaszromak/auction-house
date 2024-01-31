@@ -1,5 +1,6 @@
 package com.lukasz.auctionhouse.service;
 
+import com.lukasz.auctionhouse.domain.Address;
 import com.lukasz.auctionhouse.domain.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
@@ -13,4 +14,6 @@ public interface UserService extends UserDetailsService {
     Boolean hasUserWithUsername(String username);
     Boolean hasUserWithEmail(String email);
     User createUser(User user);
+    void updateAddress(Long id, Address address);
+    Address findAddress(Long id);
 }

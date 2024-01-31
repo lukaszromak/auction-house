@@ -32,9 +32,14 @@ public class CustomWebSecurityConfigurerAdapter {
                         .requestMatchers(contextPath + "/auth/**").permitAll()
                         .requestMatchers(contextPath + "/error").permitAll()
                         .requestMatchers(contextPath + "/bids/{itemId}").permitAll()
-                        .requestMatchers(contextPath + "/bids/placeBid").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/bids/placeBid").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, contextPath + "/posts").hasRole("MODERATOR")
+                        .requestMatchers(HttpMethod.PUT, contextPath + "/posts").hasRole("MODERATOR")
+                        .requestMatchers(HttpMethod.DELETE, contextPath + "/posts").hasRole("MODERATOR")
+                        .requestMatchers(HttpMethod.GET, contextPath + "/posts").permitAll()
+                        .requestMatchers( "/users/{id}/address").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/", "/index.html", "/static/**",
-                                "/*.ico", "/*.json", "/*.png", "/api/user").permitAll()
+                                "/*.ico", "/*.json", "/*.png", "/images/**").permitAll()
                         .anyRequest().authenticated()
                 );
         http.headers().frameOptions().disable();

@@ -1,17 +1,22 @@
 package com.lukasz.auctionhouse.service;
 
+import com.lukasz.auctionhouse.controllers.dto.BidRequest;
 import com.lukasz.auctionhouse.domain.Bid;
 import com.lukasz.auctionhouse.domain.Item;
+import com.lukasz.auctionhouse.domain.ItemStatus;
 import com.lukasz.auctionhouse.domain.User;
 import com.lukasz.auctionhouse.exception.Item.ItemBoughtException;
+import com.lukasz.auctionhouse.exception.Item.ItemExpiredException;
 import com.lukasz.auctionhouse.exception.Item.ItemNotFoundException;
 import com.lukasz.auctionhouse.exception.Item.ItemNotPricedException;
 import com.lukasz.auctionhouse.exception.UserNotFoundException;
 import com.lukasz.auctionhouse.repositories.ItemRepository;
 import com.lukasz.auctionhouse.repositories.ItemSpecifications;
+import com.lukasz.auctionhouse.repositories.ItemStatusRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -21,14 +26,21 @@ public class ItemService {
 
     private BidService bidService;
     private UserService userService;
+    private ItemStatusService itemStatusService;
     private ItemRepository itemRepository;
     private ItemCategoryService itemCategoryService;
     private ItemProducerService itemProducerService;
 
     @Autowired
-    public ItemService(BidService bidService, UserService userService, ItemRepository itemRepository, ItemCategoryService itemCategoryService, ItemProducerService itemProducerService){
+    public ItemService(BidService bidService,
+                       UserService userService,
+                       ItemStatusService itemStatusService,
+                       ItemRepository itemRepository,
+                       ItemCategoryService itemCategoryService,
+                       ItemProducerService itemProducerService){
         this.bidService = bidService;
         this.userService = userService;
+        this.itemStatusService = itemStatusService;
         this.itemRepository = itemRepository;
         this.itemCategoryService = itemCategoryService;
         this.itemProducerService = itemProducerService;
@@ -48,6 +60,7 @@ public class ItemService {
                 .map(itemProducer -> itemProducer.getId())
                 .toList())));
         item.setListedBy(listingUser);
+        item.setStatus(itemStatusService.findByName("NOT_BOUGHT"));
 
         Item savedItem = itemRepository.save(item);
 
@@ -65,7 +78,8 @@ public class ItemService {
     }
 
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
-    public Item buyItem(Long itemId, String username){
+    public void buyItem(Long itemId){
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Optional<Item> itemOptional = itemRepository.findById(itemId);
         Optional<User> userOptional = userService.getByUsername(username);
 
@@ -80,10 +94,21 @@ public class ItemService {
         Item item = itemOptional.get();
         User user = userOptional.get();
 
-        if(item.isBought()){
+        if(!item.getStatus().getName().equals("NOT_BOUGHT")){
             throw new ItemBoughtException(String.format("Item with id %d has been already bought.", itemId));
         }
-        return item;
+
+        if(item.getBuyItNowPrice() == null){
+            throw new ItemNotPricedException("That item has no buy it now option");
+        }
+
+        if(System.currentTimeMillis() >= item.getExpirationDate().getTime()){
+            throw new ItemExpiredException(String.format("Time to buy item id %d has expired", itemId));
+        }
+
+        item.setStatus(itemStatusService.findByName("BOUGHT_BIN"));
+        item.setBoughtBy(user);
+        itemRepository.save(item);
     }
 
     public Optional<Item> findItem(Long itemId){
@@ -97,7 +122,8 @@ public class ItemService {
                                 Optional<String[]> producerNames,
                                 Optional<String> categoryPhrase,
                                 Optional<Date> dateMin,
-                                Optional<Date> dateMax){
+                                Optional<Date> dateMax,
+                                Optional<String> statusName){
         List<Item> items;
         List<Specification<Item>> specifications = new ArrayList<>();
 
@@ -126,6 +152,9 @@ public class ItemService {
         }
         if(dateMax.isPresent()){
             specifications.add(Specification.where(ItemSpecifications.findByDateBefore(dateMax.get())));
+        }
+        if(statusName.isPresent()){
+            specifications.add(Specification.where(ItemSpecifications.findByIsBought(statusName.get())));
         }
 
         if(specifications.isEmpty()){

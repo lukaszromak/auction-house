@@ -11,6 +11,7 @@ import Footer from './components/misc/Footer';
 import Signup from './components/Signup';
 import ItemPage from './components/items/ItemPage';
 import AdminPage from './components/Admin/AdminPage';
+import ModeratorPage from './components/Moderator/ModeratorPage';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route path="/signup" element={<Signup/>}></Route>
           <Route path="/item/:itemId" element={<ItemPage/>}></Route>
           <Route path="/admin" element={<AdminPage/>}></Route>
+          <Route path="/moderator" element={<ModeratorPage/>}></Route>
         </Routes>
       </Router>
     </AuthProvider>

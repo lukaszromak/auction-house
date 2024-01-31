@@ -33,6 +33,21 @@ function AuthProvider({ children }) {
     return false;
   }
 
+  const userIsMod = () => {
+    const storedUser = JSON.parse(localStorage.getItem('user'))
+    if(storedUser === null || storedUser.roles === null){
+      return false;
+    }
+
+    for(let i = 0; i < storedUser.roles.length; i++){
+      if(storedUser.roles[i].roleName === "ROLE_MODERATOR"){
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   const userLogin = user => {
     localStorage.setItem('user', JSON.stringify(user))
     setUser(user)
@@ -48,6 +63,7 @@ function AuthProvider({ children }) {
     getUser,
     userIsAuthenticated,
     userIsAdmin,
+    userIsMod,
     userLogin,
     userLogout,
   }

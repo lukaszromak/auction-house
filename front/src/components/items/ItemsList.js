@@ -5,6 +5,11 @@ import { Api } from "../misc/Api";
 import ItemsSearch from "./ItemsSearch";
 
 function ItemsList() {
+    const status_map = {
+        "BOUGHT_BIN": "Not bought",
+        "BOUGHT_BIN": "Bought via bin",
+        "BOUGHT_AUCTION": "Bought via auction"
+    }
     const [items, setItems] = useState([])
 
     useEffect(() => {
@@ -37,22 +42,24 @@ function ItemsList() {
                         <thead>
                             <tr>
                                 <th>Name</th>
-                                <th>Is Bought</th>
+                                <th>Status</th>
                                 <th>Start Price</th>
                                 <th>Buy It Now Price</th>
                                 <th>Expiration Date</th>
                                 <th>Item Producers</th>
+                                <th>Item Category</th>
                             </tr>
                         </thead>
                         <tbody>
                             {items.map(item => (
                                 <tr key={item.id}>
                                     <td><Nav.Link href={`/item/${item.id}`}>{item.name}</Nav.Link></td>
-                                    <td>{item.bought ? "YES" : "NO"}</td>
+                                    <td>{item.status && item.status.name}</td>
                                     <td>{item.startPrice}</td>
                                     <td>{item.buyItNowPrice}</td>
-                                    <td>{formatDate(item.expirationDate)}</td>
+                                    <td>{item.expirationDate}</td>
                                     <td>{JSON.stringify(item.itemProducers.map(item => item.name))}</td>
+                                    <td>{item.itemCategory && item.itemCategory.name}</td>
                                 </tr>
                             ))}
                         </tbody>

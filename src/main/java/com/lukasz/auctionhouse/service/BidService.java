@@ -3,6 +3,7 @@ package com.lukasz.auctionhouse.service;
 import com.lukasz.auctionhouse.controllers.dto.BidRequest;
 import com.lukasz.auctionhouse.domain.Bid;
 import com.lukasz.auctionhouse.domain.BidHistoric;
+import com.lukasz.auctionhouse.domain.ItemStatus;
 import com.lukasz.auctionhouse.domain.User;
 import com.lukasz.auctionhouse.exception.*;
 import com.lukasz.auctionhouse.exception.BidExceptions.*;
@@ -64,7 +65,7 @@ public class BidService {
         Bid bid = bidOptional.get();
         User user = userOptional.get();
 
-        if(bid.getItem().isBought()){
+        if(!bid.getItem().getStatus().getName().equals("NOT_BOUGHT")){
             throw new BidOnBoughtItem("You cannot place bid on bought item.");
         }
 

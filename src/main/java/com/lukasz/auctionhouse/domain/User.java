@@ -39,6 +39,10 @@ public class User {
     @ManyToMany
     private Set<Role> roles;
 
+    @OneToOne
+    @JoinColumn(name = "address_id")
+    private Address address;
+
     public User(String userName, String email, String password){
         this.username = userName;
         this.email = email;

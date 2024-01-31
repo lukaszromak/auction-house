@@ -15,6 +15,7 @@ function ItemsSearch(props) {
     const [availableItemProducers, setAvailableItemProducers] = useState([]);
     const [dateMin, setMinDate] = useState("");
     const [dateMax, setMaxDate] = useState("");
+    const [isBought, setIsBought] = useState("");
     const [isPending, setIsPending] = useState(false);
 
     useEffect(() => {
@@ -65,6 +66,9 @@ function ItemsSearch(props) {
         if(dateMax !== ""){
             params.dateMax = dateMax;
         }
+        if(isBought !== ""){
+            params.isBought = isBought;
+        }
 
         return params;
     }
@@ -87,6 +91,8 @@ function ItemsSearch(props) {
             setMinDate(value);
         } else if(name === "dateMax"){
             setMaxDate(value);
+        } else if(name === "isBought"){
+            setIsBought(value);
         }
     }
 
@@ -99,6 +105,7 @@ function ItemsSearch(props) {
         setItemProducers([]);
         setMinDate("");
         setMaxDate("");
+        setIsBought("");
     }
 
     return (
@@ -109,6 +116,7 @@ function ItemsSearch(props) {
                     <Form.Label>name phrase</Form.Label>
                     <Form.Control
                     type="text"
+                    placeholder="eg. item"
                     name="namePhrase"
                     value={namePhrase}
                     onChange={(e) => handleParamsChange(e)}/>
@@ -117,6 +125,7 @@ function ItemsSearch(props) {
                     <Form.Label>description phrase</Form.Label>
                     <Form.Control
                     type="text"
+                    placeholder="eg. good item"
                     name="descriptionPhrase"
                     value={descriptionPhrase}
                     onChange={(e) => handleParamsChange(e)}/>
@@ -144,9 +153,10 @@ function ItemsSearch(props) {
                         hasSelectAll={false}/>
                 </Form.Group>
                 <Form.Group>
-                    <Form.Label>category name</Form.Label>
+                    <Form.Label>category phrase</Form.Label>
                     <Form.Control
                     type="text"
+                    placeholder="eg. Computers"
                     name="categoryPhrase"
                     value={categoryPhrase}
                     onChange={(e) => handleParamsChange(e)}/>
@@ -163,6 +173,18 @@ function ItemsSearch(props) {
                         name="dateMax" 
                         value={dateMax} 
                         onChange={(e) => handleParamsChange(e)}/>
+                </Form.Group>
+                <Form.Group>
+                    <Form.Label>is bought</Form.Label>
+                    <Form.Select 
+                        name="isBought"
+                        value={isBought}
+                        onChange={(e) => handleParamsChange(e)}>
+                        <option value={""}></option>
+                        <option value={"NOT_BOUGHT"}>Not bought</option>
+                        <option value={"BOUGHT_AUCTION"}>Bought via auction</option>
+                        <option value={"BOUGHT_BIN"}>Bought via bin</option>
+                    </Form.Select>
                 </Form.Group>
                 <Form.Group>
                     <Button type="submit" disabled={isPending}>Search</Button>

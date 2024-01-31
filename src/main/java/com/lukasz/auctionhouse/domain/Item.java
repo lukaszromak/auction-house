@@ -1,5 +1,8 @@
 package com.lukasz.auctionhouse.domain;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.lukasz.auctionhouse.serializers.CustomDateSerializer;
+import com.lukasz.auctionhouse.serializers.ItemStatusSerializer;
 import com.lukasz.auctionhouse.validators.AuctionDuration;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
@@ -50,12 +53,19 @@ public class Item implements Serializable {
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @AuctionDuration
+    @JsonSerialize(using = CustomDateSerializer.class)
     private Date expirationDate;
 
-    private boolean bought;
+    @ManyToOne
+    @JoinColumn(name = "status_id")
+    private ItemStatus status;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "bought_by")
+    private User boughtBy;
+
+    @ManyToOne
+    @JoinColumn(name = "listed_by")
     private User listedBy;
 
     private String imagePath;

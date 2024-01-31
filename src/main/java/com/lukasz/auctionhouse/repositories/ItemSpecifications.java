@@ -107,4 +107,16 @@ public class ItemSpecifications {
             return null;
         };
     }
+
+    public static Specification<Item> findByIsBought(final String statusName){
+        return (itemRoot, criteriaQuery, criteriaBuilder) -> {
+            if(!statusName.isEmpty()){
+                String phraseLike = "%" + statusName.toUpperCase() + "%";
+                Join<Item, ItemCategory> itemItemStatusJoin = itemRoot.join(Item_.STATUS);
+                return criteriaBuilder.equal(itemItemStatusJoin.get(ItemStatus_.NAME), statusName);
+            }
+
+            return null;
+        };
+    }
 }

@@ -1,22 +1,22 @@
 package com.lukasz.auctionhouse.validators;
 
+import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 import com.lukasz.auctionhouse.domain.Item;
 
+@Component
 public class CustomItemValidator implements Validator {
     @Override
-    public boolean supports(Class<?> aClass) {
-        return Item.class.isAssignableFrom(aClass);
+    public boolean supports(Class<?> clazz) {
+        return Item.class.isAssignableFrom(clazz);
     }
 
     @Override
     public void validate(Object target, Errors errors) {
-        ValidationUtils.rejectIfEmpty(errors, "buyItNowPrice", "Empty.buyItNow.field");
-        ValidationUtils.rejectIfEmpty(errors, "currentPrice", "Empty.currentPrice.field");
         Item item = (Item) target;
-        if(item.getStartPrice() >= item.getBuyItNowPrice()){
+        if(item.getStartPrice() != null && item.getBuyItNowPrice() != null && item.getStartPrice() >= item.getBuyItNowPrice()){
             errors.rejectValue("buyItNowPrice","Item.Prices.Equal", "Auction start price cannot be higher or equal than buy it now price.");
         }
         if(item.getStartPrice() == null && item.getBuyItNowPrice() == null){

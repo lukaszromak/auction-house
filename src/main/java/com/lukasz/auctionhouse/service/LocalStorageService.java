@@ -1,7 +1,6 @@
 package com.lukasz.auctionhouse.service;
 
 import com.lukasz.auctionhouse.domain.Item;
-import com.lukasz.auctionhouse.exception.Item.ItemNotFoundException;
 import com.lukasz.auctionhouse.repositories.ItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,14 +9,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 public class LocalStorageService implements StorageService {
-
+    private List<String> allowedExtensions = Arrays.asList(new String[]{"jpg", "png"});
     private final ItemRepository itemRepository;
     @Value("${upload.location}")
     private String basePath;
@@ -37,6 +37,11 @@ public class LocalStorageService implements StorageService {
         }
 
         String extension = StringUtils.getFilenameExtension(multipartFile.getOriginalFilename());
+
+        if(!allowedExtensions.contains(extension)){
+            throw new IllegalArgumentException("Illegal file extension.");
+        }
+
         String filename = String.format("%d.%s", item.getId(), extension);
         File file = new File(basePath + filename);
 
@@ -48,4 +53,5 @@ public class LocalStorageService implements StorageService {
 
         return filename;
     }
+
 }

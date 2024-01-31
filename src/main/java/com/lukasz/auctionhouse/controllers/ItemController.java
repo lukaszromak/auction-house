@@ -7,6 +7,7 @@ import com.lukasz.auctionhouse.exception.UserNotFoundException;
 import com.lukasz.auctionhouse.service.ItemService;
 import com.lukasz.auctionhouse.service.StorageService;
 import com.lukasz.auctionhouse.service.UserService;
+import com.lukasz.auctionhouse.validators.CustomItemValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -15,6 +16,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import com.lukasz.auctionhouse.domain.Item;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,12 +30,23 @@ public class ItemController {
     private UserService userService;
     private BasicAuthUtils basicAuthUtils;
     private StorageService storageService;
+    private CustomItemValidator customItemValidator;
     @Autowired
-    public ItemController(ItemService itemService, UserService userService, BasicAuthUtils basicAuthUtils, StorageService storageService){
+    public ItemController(ItemService itemService,
+                          UserService userService,
+                          BasicAuthUtils basicAuthUtils,
+                          StorageService storageService,
+                          CustomItemValidator customItemValidator){
         this.itemService = itemService;
         this.userService = userService;
         this.basicAuthUtils = basicAuthUtils;
         this.storageService = storageService;
+        this.customItemValidator = customItemValidator;
+    }
+
+    @InitBinder
+    protected void initBinder(WebDataBinder binder) {
+        binder.addValidators(customItemValidator);
     }
 
     @Operation(security = {@SecurityRequirement(name = "basicAuth")})
@@ -47,8 +60,6 @@ public class ItemController {
             throw new UserNotFoundException(String.format("User with name %s not found.", username));
         }
 
-        System.out.println(item);
-        System.out.println(listingUser.get());
         Item savedItem = itemService.saveItem(item, listingUser.get());
         item.setId(savedItem.getId());
 
@@ -82,9 +93,10 @@ public class ItemController {
                             @RequestParam(name = "producerNames", required = false) Optional<String[]> producerNames,
                             @RequestParam(name = "categoryPhrase", required = false) Optional<String> categoryPhrase,
                             @DateTimeFormat(pattern = "yyyy-MM-dd") @RequestParam(name = "dateMin", required = false) Optional<Date> dateMin,
-                            @DateTimeFormat(pattern = "yyyy-MM-dd") @RequestParam(name = "dateMax", required = false) Optional<Date> dateMax){
+                            @DateTimeFormat(pattern = "yyyy-MM-dd") @RequestParam(name = "dateMax", required = false) Optional<Date> dateMax,
+                            @RequestParam(name = "isBought", required = false) Optional<String> statusName){
 
-        List<Item> items = itemService.getAllItems(namePhrase, descriptionPhrase, minPrice, maxPrice, producerNames, categoryPhrase, dateMin, dateMax);
+        List<Item> items = itemService.getAllItems(namePhrase, descriptionPhrase, minPrice, maxPrice, producerNames, categoryPhrase, dateMin, dateMax, statusName);
 
         return items;
     }
@@ -99,10 +111,12 @@ public class ItemController {
 
         return item.get();
     }
-
-    @PostMapping("/buy")
-    public Item buyItem(@RequestHeader("Authorization") String authData, @RequestParam(name = "itemId") Long itemId){
-        return itemService.buyItem(itemId, basicAuthUtils.getUsernameFromAuthData(authData));
+    @Operation(security = {@SecurityRequirement(name = "basicAuth")})
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/{itemId}/buy")
+    public ResponseEntity buyItem(@RequestHeader("Authorization") String authData, @PathVariable(name = "itemId") Long itemId){
+        itemService.buyItem(itemId);
+        return ResponseEntity.ok("Successfully bought item");
     }
 
 }
