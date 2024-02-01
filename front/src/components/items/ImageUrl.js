@@ -6,7 +6,7 @@ const prod = {
   
   const dev = {
     url: {
-        IMAGE_BASE_URL: 'http://localhost:8080/images/'
+        IMAGE_BASE_URL: 'https://lrauctionhouse.blob.core.windows.net/auctionhouse/'
     }
   }
   

@@ -53,7 +53,6 @@ public class Item implements Serializable {
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @AuctionDuration
-    @JsonSerialize(using = CustomDateSerializer.class)
     private Date expirationDate;
 
     @ManyToOne

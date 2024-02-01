@@ -1,5 +1,6 @@
 package com.lukasz.auctionhouse.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -32,6 +33,7 @@ public class User {
 
     @Size(max = 60)
     @NotBlank
+    @JsonIgnore
     private String password;
 
     private Boolean enabled;

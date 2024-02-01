@@ -47,6 +47,10 @@ public class BidService {
         return bidRepository.findByItemId(itemId);
     }
 
+    public Long getHistoricCount(){
+        return bidHistoricRepository.count();
+    }
+
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Bid placeBid(BidRequest bidRequest, String username) {

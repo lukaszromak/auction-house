@@ -20,7 +20,9 @@ export const Api = {
   getPosts,
   addPost,
   deletePost,
-  updatePost
+  updatePost,
+  addReport,
+  getReports,
 }
 
 function authenticate(username, password) {
@@ -180,6 +182,24 @@ function updatePost(postId, post, user){
       'Authorization': basicAuth(user)
     }
   });
+}
+
+function addReport(user){
+  return instance.post(`/reports`, null, {
+    headers : {
+    'Content-type': 'application/json',
+    'Authorization': basicAuth(user)
+    }
+  })
+}
+
+function getReports(user){
+  return instance.get(`/reports`, {
+    headers : {
+    'Content-type': 'application/json',
+    'Authorization': basicAuth(user)
+    }
+  })
 }
 
 // -- Axios

@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext"
 import { Api } from "../misc/Api";
 import ItemCategoryTable from "./ItemCategoryTable";
 import ItemProducerTable from "./ItemProducerTable";
+import ReportList from "./ReportList";
 
 function AdminPage() {
     const Auth = useAuth();
@@ -12,6 +13,8 @@ function AdminPage() {
     const user = Auth.getUser();
     const [itemCategories, setItemCategories] = useState([]);
     const [itemProducers, setItemProducers] = useState([]);
+    const [reports, setReports] = useState([]);
+    const [addReportResponseOK, setAddReportResponseOK] = useState(false);
     const [categoryName, setCategoryName] = useState("");
     const [producerName, setProducerName] = useState("");
     const [categoryValidated, setCategoryValidated] = useState(false);
@@ -22,6 +25,7 @@ function AdminPage() {
     useEffect(() => {
         handleGetCategories();
         handleGetProducers();
+        handleGetReports();
     }, []);
 
     const handleInputChange = (e) => {
@@ -120,7 +124,27 @@ function AdminPage() {
                 } 
             }
         }
-        
+    }
+
+    const handleGetReports = async () => {
+        try {
+            const response = await Api.getReports(user);
+            const reports = response.data;
+            setReports(reports);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const handleAddReport = async () => {
+        try {
+            const response = await Api.addReport(user);
+            if(response.status === 200){
+                setAddReportResponseOK(true);
+            }
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     if(!userIsAdmin){
@@ -129,6 +153,10 @@ function AdminPage() {
 
     return (
         <Container className="mb-5">
+            <ReportList
+                reports={reports}
+                handleAddReport={handleAddReport}
+                addReportResponseOK={addReportResponseOK}/>
             <ItemCategoryTable
                 itemCategories={itemCategories}
                 categoryName={categoryName}
