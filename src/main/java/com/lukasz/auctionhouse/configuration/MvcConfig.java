@@ -7,7 +7,7 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-@Profile("!prod")
+@Profile("dev")
 public class MvcConfig implements WebMvcConfigurer {
 
     @Value("${upload.location}")

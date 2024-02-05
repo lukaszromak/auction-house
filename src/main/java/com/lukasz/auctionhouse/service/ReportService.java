@@ -5,6 +5,8 @@ import com.lukasz.auctionhouse.domain.ReportRequest;
 import com.lukasz.auctionhouse.domain.User;
 import com.lukasz.auctionhouse.exception.UserNotFoundException;
 import com.lukasz.auctionhouse.repositories.ReportRepository;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,7 @@ import java.util.Date;
 import java.util.Optional;
 
 @Service
+@ConditionalOnProperty(name = "service.bus", havingValue = "true")
 public class ReportService {
     private static final String REQUEST_QUEUE = "reportrequest";
     private static final String RESPONSE_QUEUE = "reportresponse";
@@ -42,8 +45,6 @@ public class ReportService {
         if(userOptional.isEmpty()){
             throw new UserNotFoundException(String.format("User with name %s not found", requestedBy));
         }
-
-        Thread.sleep(10000);
 
         User user = userOptional.get();
         Report report = new Report();

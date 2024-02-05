@@ -6,6 +6,7 @@ import com.lukasz.auctionhouse.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jms.core.JmsTemplate;
@@ -17,6 +18,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/reports")
+@ConditionalOnProperty(name = "service.bus", havingValue = "true")
 public class ReportController {
 
     private ReportService reportService;

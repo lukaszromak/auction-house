@@ -9,7 +9,9 @@ import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.lukasz.auctionhouse.domain.Item;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -21,7 +23,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-//@Service
+@Service
+@ConditionalOnProperty(name = "storage.service", havingValue = "azure")
 public class AzureStorageService implements StorageService{
     private List<String> allowedExtensions = Arrays.asList(new String[]{"jpg", "png"});
     private BlobContainerClient blobContainerClient;

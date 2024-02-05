@@ -5,14 +5,14 @@ import com.azure.communication.email.models.EmailMessage;
 import com.azure.communication.email.models.EmailSendResult;
 import com.azure.core.util.polling.PollResponse;
 import com.azure.core.util.polling.SyncPoller;
-import com.lukasz.auctionhouse.domain.Report;
-import com.lukasz.auctionhouse.domain.ReportRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Service;
 
 @Service
+@ConditionalOnProperty(name = "email.service", havingValue = "true")
 public class EmailService {
     @Value("${azure.email.domain}")
     private String domain;
