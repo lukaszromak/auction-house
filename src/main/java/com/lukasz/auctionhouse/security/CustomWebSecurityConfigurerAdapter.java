@@ -5,12 +5,15 @@ import com.lukasz.auctionhouse.configuration.SpaWebFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+
 
 @Configuration
 public class CustomWebSecurityConfigurerAdapter {
@@ -30,7 +33,6 @@ public class CustomWebSecurityConfigurerAdapter {
                         .requestMatchers(HttpMethod.DELETE, contextPath + "/itemProducers/{producerId}").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, contextPath + "/itemProducers").hasRole("ADMIN")
                         .requestMatchers(contextPath + "/auth/**").permitAll()
-                        .requestMatchers(contextPath + "/error").permitAll()
                         .requestMatchers(HttpMethod.GET, contextPath + "/bids/**").permitAll()
                         .requestMatchers(HttpMethod.POST, contextPath + "/bids/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.POST, contextPath + "/posts").hasRole("MODERATOR")
@@ -39,6 +41,7 @@ public class CustomWebSecurityConfigurerAdapter {
                         .requestMatchers(HttpMethod.GET, contextPath + "/posts").permitAll()
                         .requestMatchers( "/users/{id}/address").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(contextPath + "/reports").hasRole("ADMIN")
+                        .requestMatchers(contextPath + "/error").permitAll()
                         .requestMatchers("/", "/index.html", "/static/**",
                                 "/*.ico", "/*.json", "/*.png", "/images/**").permitAll()
                         .anyRequest().authenticated()
@@ -46,6 +49,8 @@ public class CustomWebSecurityConfigurerAdapter {
         http.headers().frameOptions().disable();
         http.cors(Customizer.withDefaults());
         http.httpBasic(Customizer.withDefaults());
+        http.exceptionHandling()
+                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
         http.csrf(AbstractHttpConfigurer::disable);
         http.sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.addFilterAfter(new SpaWebFilter(), BasicAuthenticationFilter.class);

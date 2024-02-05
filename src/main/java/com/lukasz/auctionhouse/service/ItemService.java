@@ -1,9 +1,7 @@
 package com.lukasz.auctionhouse.service;
 
-import com.lukasz.auctionhouse.controllers.dto.BidRequest;
 import com.lukasz.auctionhouse.domain.Bid;
 import com.lukasz.auctionhouse.domain.Item;
-import com.lukasz.auctionhouse.domain.ItemStatus;
 import com.lukasz.auctionhouse.domain.User;
 import com.lukasz.auctionhouse.exception.Item.ItemBoughtException;
 import com.lukasz.auctionhouse.exception.Item.ItemExpiredException;
@@ -12,7 +10,6 @@ import com.lukasz.auctionhouse.exception.Item.ItemNotPricedException;
 import com.lukasz.auctionhouse.exception.UserNotFoundException;
 import com.lukasz.auctionhouse.repositories.ItemRepository;
 import com.lukasz.auctionhouse.repositories.ItemSpecifications;
-import com.lukasz.auctionhouse.repositories.ItemStatusRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
