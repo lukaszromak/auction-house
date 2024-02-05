@@ -1,12 +1,12 @@
 const prod = {
     url: {
-        IMAGE_BASE_URL: 'http://98.64.67.168/api'
+        IMAGE_BASE_URL: 'https://lrauctionhouse.blob.core.windows.net/auctionhouse/'
     }
   }
   
   const dev = {
     url: {
-        IMAGE_BASE_URL: 'https://lrauctionhouse.blob.core.windows.net/auctionhouse/'
+        IMAGE_BASE_URL: 'http://localhost:8080/images/'
     }
   }
   

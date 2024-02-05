@@ -1,6 +1,6 @@
 const prod = {
     url: {
-      API_BASE_URL: '20.23.27.146/api'
+      API_BASE_URL: 'http://20.54.208.223/api'
     }
   }
   

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { json, useParams } from "react-router-dom";
-import { Button, Container, Row, Col, Image, FormControl, Alert, Figure } from "react-bootstrap";
+import { Button, Container, Row, Col, FormControl, Alert, Figure } from "react-bootstrap";
 import { Api } from "../misc/Api";
 import { useAuth } from "../context/AuthContext";
 import { config } from "./ImageUrl";
@@ -19,6 +19,7 @@ function ItemPage() {
     const [buyItemErrorMessage, setBuyItemErrorMessage] = useState("");
     const [placeBidSuccess, setPlaceBidSuccess] = useState(false);
     const [isNotFound, setIsNotFound] = useState(false);
+    const noPhotoAltImg =  require("./nophoto.jpg");
 
     useEffect(() => {
         if(itemId !== null){
@@ -48,6 +49,7 @@ function ItemPage() {
         try {
             const response = await Api.getBid(itemId);
             const bid = response.data;
+            console.log(bid);
             setBid(bid);
             setOffer(bid.currentPrice);
         } catch(error) {
@@ -126,9 +128,13 @@ function ItemPage() {
                     <h1>{item.name}</h1>
                     <Figure>
                         <Figure.Image fluid
-                        src={item.imagePath ? `${config.url.IMAGE_BASE_URL}${item.imagePath}` : require("./nophoto.jpg")}/>
+                        src={item.imagePath ? `${config.url.IMAGE_BASE_URL}${item.imagePath}` : require("./nophoto.jpg")}
+                        onError={({ currentTarget }) => {
+                            currentTarget.onerror = null; // prevents looping
+                            currentTarget.src = noPhotoAltImg;
+                          }}/>
                         <Figure.Caption>
-                            listed by {item.listedBy && item.listedBy.username}
+                            listed by {item.listedBy}
                         </Figure.Caption>
                     </Figure>
                 </Col>
@@ -138,13 +144,13 @@ function ItemPage() {
                     buyItemSuccess ?
                     <Alert variant="success">You bought the item.</Alert>
                     :
-                    (bid && item.status && item.status.name === "BOUGHT_AUCTION") ?
+                    (bid && item.status && item.status === "BOUGHT_AUCTION") ?
                     <Alert>That item was sold for {bid.currentPrice}zł</Alert> 
                     :
-                    bid && item.status.name === "NOT_BOUGHT" ?      
+                    bid && item.status === "NOT_BOUGHT" ?      
                     <>           
                         <h3>Current price - {bid.currentPrice}zł</h3>
-                        <h4>current winner - {bid.user && bid.user.username}</h4>
+                        <h4>current winner - {bid.username}</h4>
                         {placeBidSuccess &&
                         <Alert variant="success">
                         {placeBidResponse}
@@ -157,22 +163,18 @@ function ItemPage() {
                         <Button className="mt-2" onClick={() => {handlePlaceBid()}}>Bid</Button>
                     </> 
                     :
-                    (!bid && item.status.name === "NOT_BOUGHT") && <Alert>That item has no auction.</Alert>
+                    (!bid && item.status === "NOT_BOUGHT") && <Alert>That item has no auction.</Alert>
                     }
                     {
-                    // display info about bin
-                    (item.status && item.status.name === "BOUGHT_BIN") ? <Alert>That item was sold for {item.buyItNowPrice}zł</Alert> 
+                    (item.status === "BOUGHT_BIN") ? <Alert>That item was sold for {item.buyItNowPrice}zł</Alert> 
                     :
-                    (item.buyItNowPrice && item.status.name === "NOT_BOUGHT" && !buyItemSuccess) ?
+                    (item.buyItNowPrice && item.status === "NOT_BOUGHT" && !buyItemSuccess) ?
                     <>
                     <h3>Buy it now price - {item.buyItNowPrice}</h3> 
                     <Button onClick={handleBuyItem}>Buy</Button>
                     </>
                     :
-                    (!item.buyItNowPrice && item.status.name === "NOT_BOUGHT") ?
-                    <Alert className="mt-2">This item has no buy it now option.</Alert> 
-                    :
-                    ""
+                    (!item.buyItNowPrice && item.status === "NOT_BOUGHT") && <Alert className="mt-2">This item has no buy it now option.</Alert> 
                     }
                 </Col>
             </Row>
@@ -181,10 +183,10 @@ function ItemPage() {
                 {item.description.length === 0 ? "No description provided." : <p>item.description</p>}
                 <h2 className="mt-5">Additional Info</h2>
                 <Row>
-                    <p>Categories: {item.itemCategory && item.itemCategory.name}</p>
+                    <p>Categories: {item.itemCategory}</p>
                 </Row>
                 <Row>
-                    <p>Producers: {JSON.stringify(item.itemProducers)}</p>
+                    <p>Producers: {(JSON.stringify(item.itemProducers))}</p>
                 </Row>
             </Row>
             </>

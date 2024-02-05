@@ -19,10 +19,10 @@ function NavbarMenu() {
                   width={30}
                   height={30}
                   className="d-inline-block align-top"
-                  src="favicon.png"/>
+                  src="../favicon.png"/>
               Auction House
             </Navbar.Brand>
-            <Navbar.Toggle aria-controls="basic-navbar-nav" />
+            <Navbar.Toggle aria-controls="basic-navbar-nav"/>
             <Navbar.Collapse id="basic-navbar-nav">
               <Nav className="me-auto">
                 <Nav.Link href="/">Home</Nav.Link>

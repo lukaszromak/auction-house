@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Form, Button, Container, Alert } from "react-bootstrap";
+import { Form, Button, Container, Row, Col, Alert } from "react-bootstrap";
 import { Navigate, useNavigate } from "react-router-dom";
 import { MultiSelect } from "react-multi-select-component";
 import { useAuth } from "../context/AuthContext";
@@ -116,89 +116,99 @@ function ItemForm() {
 
     return (
         <Container>
-            <h1 style={{textAlign: "center"}}>Add item</h1>
-            <Form noValidate validated={validated} onSubmit={handleSubmit}>
-                <Form.Group>
-                    <Form.Label>Item name</Form.Label>
-                    <Form.Control 
-                        type="text"
-                        name="name" 
-                        value={name} 
-                        onChange={(e) => handleInputChange(e)}
-                        required
-                        minLength={3}
-                        maxLength={100}/>
-                    <Form.Control.Feedback type="invalid">Enter a name with 3-100 characters.</Form.Control.Feedback>
-                </Form.Group>
-                <Form.Group>
-                    <Form.Label>Auction start price (leave empty if you don't want to create auction)</Form.Label>
-                    <Form.Control 
-                        type="number" 
-                        name="startPrice" 
-                        value={startPrice} 
-                        onChange={(e) => handleInputChange(e)}/>
-                </Form.Group>
-                <Form.Group>
-                    <Form.Label>Buy It now price (leave empty if you don't want item to have buy it now option)</Form.Label>
-                    <Form.Control 
-                        type="number" 
-                        name="buyItNowPrice" 
-                        value={buyItNowPrice} 
-                        onChange={(e) => handleInputChange(e)}/>
-                    <Form.Control.Feedback type="invalid">Enter buy it now price.</Form.Control.Feedback>
-                </Form.Group>
-                <Form.Group>
-                    <Form.Label>Description (optional)</Form.Label>
-                    <Form.Control 
-                        as="textarea"
-                        rows={3} 
-                        name="description" 
-                        value={description} 
-                        onChange={(e) => handleInputChange(e)}
-                        />
-                </Form.Group>
-                <Form.Group>
-                    <Form.Label>Expiration date</Form.Label>
-                    <Form.Control 
-                        type="date" 
-                        name="expirationDate" 
-                        value={expirationDate} 
-                        onChange={(e) => handleInputChange(e)}
-                        required
-                        min={getTwoDayLater()}/>
-                    <Form.Control.Feedback type="invalid">Choose expiration date. (minimum one day later than today)</Form.Control.Feedback>
-                </Form.Group>
-                    <Form.Label>Item category</Form.Label>
-                    <Form.Select 
-                        name="itemCategory" 
-                        onChange={(e) => handleInputChange(e)}
-                        required>
-                        {itemCategories.length > 0 && <option value="">Choose category</option>}
-                        {itemCategories.length === 0 ? <option>Fetching categories</option> :
-                        itemCategories.map(itemCategory => (
-                            <option key={itemCategory.id} value={`${itemCategory.id};${itemCategory.name}`}>{itemCategory.name}</option>
-                        ))}
-                    </Form.Select>
-                    <Form.Control.Feedback type="invalid">Choose item category.</Form.Control.Feedback>
-                <Form.Group>
-                    <Form.Label>Item producer/s</Form.Label>
-                    <MultiSelect
-                        options={availableItemProducers}
-                        value={itemProducers}
-                        onChange={setItemProducers}
-                        labelledBy="Select"
-                        hasSelectAll={false}/>
-                </Form.Group>
-                <Form.Group>
-                    <Form.Label>Item image (optional)</Form.Label>
-                    <Form.Control
-                        type="file"
-                        name="imageFile"
-                        onChange={(e) => handleInputChange(e)}/>
-                </Form.Group>
-                <Button type="submit" disabled={isPending}>Add item</Button>
-            </Form>
-            {!failedToAdd ? "" : <Alert variant="danger">{failedToAddMessage}</Alert>}
+            <Row className="d-flex justify-content-center mb-3">
+                <Col className="col-md-6">
+                    <h1>List item</h1>
+                </Col>
+            </Row>
+            <Row className="d-flex justify-content-center">
+                <Col className="col-lg-6">
+                    <Form noValidate validated={validated} onSubmit={handleSubmit}>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Item name</Form.Label>
+                            <Form.Control 
+                                type="text"
+                                name="name" 
+                                value={name} 
+                                onChange={(e) => handleInputChange(e)}
+                                required
+                                minLength={3}
+                                maxLength={100}/>
+                            <Form.Control.Feedback type="invalid">Enter a name with 3-100 characters.</Form.Control.Feedback>
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Auction start price (leave empty if you don't want to create auction)</Form.Label>
+                            <Form.Control 
+                                type="number" 
+                                name="startPrice" 
+                                value={startPrice} 
+                                onChange={(e) => handleInputChange(e)}/>
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Buy It now price (leave empty if you don't want item to have buy it now option)</Form.Label>
+                            <Form.Control 
+                                type="number" 
+                                name="buyItNowPrice" 
+                                value={buyItNowPrice} 
+                                onChange={(e) => handleInputChange(e)}/>
+                            <Form.Control.Feedback type="invalid">Enter buy it now price.</Form.Control.Feedback>
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Description (optional)</Form.Label>
+                            <Form.Control 
+                                as="textarea"
+                                rows={3} 
+                                name="description" 
+                                value={description} 
+                                onChange={(e) => handleInputChange(e)}
+                                />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Expiration date</Form.Label>
+                            <Form.Control 
+                                type="date" 
+                                name="expirationDate" 
+                                value={expirationDate} 
+                                onChange={(e) => handleInputChange(e)}
+                                required
+                                min={getTwoDayLater()}/>
+                            <Form.Control.Feedback type="invalid">Choose expiration date. (minimum one day later than today)</Form.Control.Feedback>
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Item category</Form.Label>
+                            <Form.Select 
+                                name="itemCategory" 
+                                onChange={(e) => handleInputChange(e)}
+                                required>
+                                {itemCategories.length > 0 && <option value="">Choose category</option>}
+                                {itemCategories.length === 0 ? <option>Fetching categories</option> :
+                                itemCategories.map(itemCategory => (
+                                    <option key={itemCategory.id} value={`${itemCategory.id};${itemCategory.name}`}>{itemCategory.name}</option>
+                                ))}
+                            </Form.Select>
+                            <Form.Control.Feedback type="invalid">Choose item category.</Form.Control.Feedback>
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Item producer/s</Form.Label>
+                            <MultiSelect
+                                options={availableItemProducers}
+                                value={itemProducers}
+                                onChange={setItemProducers}
+                                labelledBy="Select"
+                                hasSelectAll={false}/>
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Item image (optional)</Form.Label>
+                            <Form.Control
+                                type="file"
+                                name="imageFile"
+                                onChange={(e) => handleInputChange(e)}/>
+                        </Form.Group>
+                        <Button type="submit" disabled={isPending}>Add item</Button>
+                    </Form>
+                    {!failedToAdd ? "" : <Alert variant="danger">{failedToAddMessage}</Alert>}
+                </Col>
+                </Row>
         </Container>
     );
 }

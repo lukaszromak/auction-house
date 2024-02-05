@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
-import { Table, Container, Col, Row, Nav } from "react-bootstrap";
+import { Image, Container, Col, Row, Nav } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { Api } from "../misc/Api";
+import { config } from "./ImageUrl";
 import ItemsSearch from "./ItemsSearch";
 
 function ItemsList() {
+    const noPhotoAltImg = require("./nophoto.jpg")
     const status_map = {
         "BOUGHT_BIN": "Not bought",
         "BOUGHT_BIN": "Bought via bin",
@@ -13,13 +15,14 @@ function ItemsList() {
     const [items, setItems] = useState([])
 
     useEffect(() => {
-        handleGetItems({});
+        handleGetItems({isBought: "NOT_BOUGHT"});
     }, [])
 
     const handleGetItems = async (params) => {
         try {
             const response = await Api.getItems(params);
             const items = response.data
+            console.log(items);
             setItems(items)
         } catch (error) {
             console.log(error)
@@ -38,33 +41,35 @@ function ItemsList() {
                 <ItemsSearch
                     handleGetItems={handleGetItems}/>
                 <Col lg={9}>
-                    <Table>
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Status</th>
-                                <th>Start Price</th>
-                                <th>Buy It Now Price</th>
-                                <th>Expiration Date</th>
-                                <th>Item Producers</th>
-                                <th>Item Category</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {items.map(item => (
-                                <tr key={item.id}>
-                                    <td><Nav.Link href={`/item/${item.id}`}>{item.name}</Nav.Link></td>
-                                    <td>{item.status && item.status.name}</td>
-                                    <td>{item.startPrice}</td>
-                                    <td>{item.buyItNowPrice}</td>
-                                    <td>{item.expirationDate}</td>
-                                    <td>{JSON.stringify(item.itemProducers.map(item => item.name))}</td>
-                                    <td>{item.itemCategory && item.itemCategory.name}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </Table>
-                    <Link to="/itemForm">Add item</Link>
+                    {items.map(item => (
+                        <>
+                        <Row key={item.id} className="mb-3">
+                            <Col>
+                                <Nav.Link href={`/item/${item.id}`}>
+                                    <Image
+                                        src={item.imagePath ? `${config.url.IMAGE_BASE_URL}${item.imagePath}` : noPhotoAltImg}
+                                        fluid
+                                        onError={({ currentTarget }) => {
+                                            currentTarget.onerror = null; // prevents looping
+                                            currentTarget.src = noPhotoAltImg;
+                                        }}/>
+                                </Nav.Link>
+                            </Col>
+                            <Col className="d-flex flex-column justify-content-between">
+                                <span>
+                                    <Nav.Link href={`/item/${item.id}`}><h2>{item.name}</h2></Nav.Link>
+                                    <p>listed by: {item.listedBy}</p>
+                                </span>
+                                <span>
+                                    {(item.startPrice && item.status === "NOT_BOUGHT") && <p>auction starting price: {item.startPrice}zł</p>}
+                                    {(item.buyItNowPrice && item.status === "NOT_BOUGHT") && <p>buy it now for: {item.buyItNowPrice}zł</p>}
+                                </span>
+                                <p>expires at: {formatDate(item.expirationDate)}</p>
+                            </Col>
+                        </Row>
+                        <hr/>
+                        </>
+                    ))}
                 </Col>
             </Row>
         </Container>

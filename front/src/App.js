@@ -1,4 +1,3 @@
-import { ReactDOM } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { AuthProvider } from './components/context/AuthContext';
 import './App.css';
@@ -16,19 +15,22 @@ import ModeratorPage from './components/Moderator/ModeratorPage';
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <NavbarMenu></NavbarMenu>
-        <Routes>
-          <Route path="/" element={<Home/>}></Route>
-          <Route path="/login" element={<Login/>}></Route>
-          <Route path="/items" element={<ItemsList/>}></Route>
-          <Route path="/itemForm" element={<ItemForm/>}></Route>
-          <Route path="/signup" element={<Signup/>}></Route>
-          <Route path="/item/:itemId" element={<ItemPage/>}></Route>
-          <Route path="/admin" element={<AdminPage/>}></Route>
-          <Route path="/moderator" element={<ModeratorPage/>}></Route>
-        </Routes>
-      </Router>
+        <div className="d-flex flex-column min-vh-100">
+        <Router>
+          <NavbarMenu></NavbarMenu>
+          <Routes>
+            <Route path="/" element={<Home/>}></Route>
+            <Route path="/login" element={<Login/>}></Route>
+            <Route path="/items" element={<ItemsList/>}></Route>
+            <Route path="/itemForm" element={<ItemForm/>}></Route>
+            <Route path="/signup" element={<Signup/>}></Route>
+            <Route path="/item/:itemId" element={<ItemPage/>}></Route>
+            <Route path="/admin" element={<AdminPage/>}></Route>
+            <Route path="/moderator" element={<ModeratorPage/>}></Route>
+          </Routes>
+          <Footer/>
+        </Router>
+        </div>
     </AuthProvider>
   );
 }
