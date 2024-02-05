@@ -2,14 +2,16 @@ package com.lukasz.auctionhouse.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Data
+@NoArgsConstructor
+@Getter
+@Setter
 @EntityListeners(BidListener.class)
 public class Bid {
-
-    public Bid(){}
 
     public Bid(Long id, Item item, Float currentPrice, User user, Long timestamp){
         this.id = id;

@@ -1,6 +1,7 @@
 package com.lukasz.auctionhouse.controllers;
 
-import com.lukasz.auctionhouse.controllers.utils.BasicAuthUtils;
+import com.lukasz.auctionhouse.controllers.dto.ItemResponse;
+import com.lukasz.auctionhouse.controllers.mappers.ItemMapper;
 import com.lukasz.auctionhouse.domain.User;
 import com.lukasz.auctionhouse.exception.Item.ItemNotFoundException;
 import com.lukasz.auctionhouse.exception.UserNotFoundException;
@@ -16,11 +17,13 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import com.lukasz.auctionhouse.domain.Item;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/items")
@@ -28,20 +31,20 @@ public class ItemController {
 
     private ItemService itemService;
     private UserService userService;
-    private BasicAuthUtils basicAuthUtils;
     private StorageService storageService;
     private CustomItemValidator customItemValidator;
+    private ItemMapper itemMapper;
     @Autowired
     public ItemController(ItemService itemService,
                           UserService userService,
-                          BasicAuthUtils basicAuthUtils,
                           StorageService storageService,
-                          CustomItemValidator customItemValidator){
+                          CustomItemValidator customItemValidator,
+                          ItemMapper itemMapper){
         this.itemService = itemService;
         this.userService = userService;
-        this.basicAuthUtils = basicAuthUtils;
         this.storageService = storageService;
         this.customItemValidator = customItemValidator;
+        this.itemMapper = itemMapper;
     }
 
     @InitBinder
@@ -52,9 +55,9 @@ public class ItemController {
     @Operation(security = {@SecurityRequirement(name = "basicAuth")})
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public Item createItem(@RequestHeader(name = "Authorization") String authData,
+    public ItemResponse createItem(@RequestHeader(name = "Authorization") String authData,
                            @Valid @RequestBody Item item){
-        String username = basicAuthUtils.getUsernameFromAuthData(authData);
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Optional<User> listingUser = userService.getByUsername(username);
         if(listingUser.isEmpty()){
             throw new UserNotFoundException(String.format("User with name %s not found.", username));
@@ -63,7 +66,7 @@ public class ItemController {
         Item savedItem = itemService.saveItem(item, listingUser.get());
         item.setId(savedItem.getId());
 
-        return item;
+        return itemMapper.toResponse(item);
     }
 
     @Operation(security = {@SecurityRequirement(name = "basicAuth")})
@@ -85,7 +88,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<Item> getItems(
+    public List<ItemResponse> getItems(
                             @RequestParam(name = "namePhrase", required = false) Optional<String> namePhrase,
                             @RequestParam(name = "descriptionPhrase", required = false) Optional<String> descriptionPhrase,
                             @RequestParam(name = "minPrice", required = false) Optional<Float> minPrice,
@@ -98,18 +101,21 @@ public class ItemController {
 
         List<Item> items = itemService.getAllItems(namePhrase, descriptionPhrase, minPrice, maxPrice, producerNames, categoryPhrase, dateMin, dateMax, statusName);
 
-        return items;
+        return items
+                .stream()
+                .map(item -> itemMapper.toResponse(item))
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{itemId}")
-    public Item getItem(@PathVariable Long itemId){
+    public ItemResponse getItem(@PathVariable Long itemId){
         Optional<Item> item = itemService.findItem(itemId);
 
         if(item.isEmpty()){
             throw new ItemNotFoundException(String.format("Item with id %d not found.", itemId));
         }
 
-        return item.get();
+        return itemMapper.toResponse(item.get());
     }
     @Operation(security = {@SecurityRequirement(name = "basicAuth")})
     @ResponseStatus(HttpStatus.OK)

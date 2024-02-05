@@ -3,7 +3,6 @@ package com.lukasz.auctionhouse.service;
 import com.lukasz.auctionhouse.controllers.dto.BidRequest;
 import com.lukasz.auctionhouse.domain.Bid;
 import com.lukasz.auctionhouse.domain.BidHistoric;
-import com.lukasz.auctionhouse.domain.ItemStatus;
 import com.lukasz.auctionhouse.domain.User;
 import com.lukasz.auctionhouse.exception.*;
 import com.lukasz.auctionhouse.exception.BidExceptions.*;
@@ -11,6 +10,7 @@ import com.lukasz.auctionhouse.repositories.BidHistoricRepository;
 import com.lukasz.auctionhouse.repositories.BidRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,17 +53,18 @@ public class BidService {
 
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Bid placeBid(BidRequest bidRequest, String username) {
-        Optional<Bid> bidOptional = findBid(bidRequest.getBidId());
-
-        if(bidOptional.isEmpty()){
-            throw new BidNotFoundException(String.format("Bid with id %d not found.", bidRequest.getBidId()));
-        }
-
+    public Bid placeBid(BidRequest bidRequest) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Optional<User> userOptional = userService.getByUsername(username);
 
         if(userOptional.isEmpty()){
             throw new UserNotFoundException(String.format("User not found."));
+        }
+
+        Optional<Bid> bidOptional = findBid(bidRequest.getBidId());
+
+        if(bidOptional.isEmpty()){
+            throw new BidNotFoundException(String.format("Bid with id %d not found.", bidRequest.getBidId()));
         }
 
         Bid bid = bidOptional.get();

@@ -2,7 +2,7 @@ package com.lukasz.auctionhouse.controllers;
 
 import com.lukasz.auctionhouse.controllers.dto.BidRequest;
 import com.lukasz.auctionhouse.controllers.dto.BidResponse;
-import com.lukasz.auctionhouse.controllers.utils.BasicAuthUtils;
+import com.lukasz.auctionhouse.controllers.mappers.ItemMapper;
 import com.lukasz.auctionhouse.domain.Bid;
 import com.lukasz.auctionhouse.exception.BidExceptions.BidNotFoundException;
 import com.lukasz.auctionhouse.service.BidService;
@@ -18,13 +18,12 @@ import java.util.Optional;
 public class BidController {
 
     private BidService bidService;
-    private BasicAuthUtils basicAuthUtils;
+    private ItemMapper itemMapper;
 
     @Autowired
-    public BidController(BidService bidService, BasicAuthUtils basicAuthUtils){
+    public BidController(BidService bidService, ItemMapper itemMapper){
         this.bidService = bidService;
-        this.basicAuthUtils = basicAuthUtils;
-
+        this.itemMapper = itemMapper;
     }
 
     @GetMapping("/{itemId}")
@@ -37,15 +36,13 @@ public class BidController {
 
         Bid bid = bidOptional.get();
 
-        return new BidResponse(bid.getId(), bid.getUser(), bid.getCurrentPrice(), bid.getTimestamp());
+        return new BidResponse(bid.getId(), itemMapper.toResponse(bid.getItem()), bid.getCurrentPrice(), bid.getUser().getUsername(), bid.getTimestamp());
     }
 
     @ResponseStatus(HttpStatus.ACCEPTED)
     @PostMapping("/placeBid")
-    private BidResponse placeBid(@RequestHeader("Authorization") String authData, @Valid @RequestBody BidRequest bidRequest){
-        Bid bid = bidService.placeBid(bidRequest, basicAuthUtils.getUsernameFromAuthData(authData));
-
-        return new BidResponse(bid.getId(), bid.getUser(), bid.getCurrentPrice(), bid.getTimestamp());
+    private Bid placeBid(@RequestHeader("Authorization") String authData, @Valid @RequestBody BidRequest bidRequest){
+        return bidService.placeBid(bidRequest);
     }
 
 }
