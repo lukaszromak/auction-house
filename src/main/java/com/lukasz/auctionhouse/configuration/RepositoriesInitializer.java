@@ -3,10 +3,14 @@ package com.lukasz.auctionhouse.configuration;
 import com.lukasz.auctionhouse.domain.*;
 import com.lukasz.auctionhouse.repositories.*;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.Resource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.*;
 
 
@@ -62,8 +66,9 @@ public class RepositoriesInitializer {
     }
 
     @Bean
-    List<Item> items(){
+    List<Item> items(@Value("classpath:mock_items.csv") Resource mockData) throws IOException {
         Calendar calendar = Calendar.getInstance();
+        ArrayList<Item> items = createMockItems(mockData.getContentAsString(Charset.defaultCharset()));
 
         //bin price, no auction, not bought
         Item i1 = new Item();
@@ -90,7 +95,11 @@ public class RepositoriesInitializer {
         i3.setBuyItNowPrice(10F);
         i3.setDescription("Sehr cooler Artikel.");
 
-        return Arrays.asList(i1, i2, i3);
+        items.add(i1);
+        items.add(i2);
+        items.add(i3);
+
+        return items;
     }
 
     @Bean
@@ -107,7 +116,7 @@ public class RepositoriesInitializer {
         return Arrays.asList(itemStatus, itemStatus1, itemStatus2);
     }
 
-    @Bean
+    //@Bean
     List<Bid> bids(){
         Bid bid2 = new Bid(null, null, 1F, null, System.currentTimeMillis());
         Bid bid3 = new Bid(null, null, 1F, null, System.currentTimeMillis());
@@ -170,38 +179,10 @@ public class RepositoriesInitializer {
                           List<ItemProducer> producers,
                           List<Item> items,
                           List<ItemStatus> itemStatuses,
-                          List<Bid> bids,
                           List<User> users,
                           List<Role> roles,
                           List<Post> posts){
         return () -> {
-            if(itemCategoryRepository.findAll().isEmpty()){
-                itemCategoryRepository.saveAll(itemCategories);
-            }
-            if(itemProducerRepository.findAll().isEmpty()){
-                itemProducerRepository.saveAll(producers);
-            }
-            if(itemStatusRepository.findAll().isEmpty()){
-                itemStatusRepository.saveAll(itemStatuses);
-            }
-            if(itemRepository.findAll().isEmpty()){
-                items.get(0).setItemCategory(itemCategories.get(0));
-                items.get(1).setItemCategory(itemCategories.get(1));
-                items.get(2).setItemCategory(itemCategories.get(2));
-                items.get(0).setItemProducers(new HashSet<>(producers.subList(0, 2)));
-                items.get(1).setItemProducers(new HashSet<>(producers.subList(1, 2)));
-                items.get(2).setItemProducers(new HashSet<>(producers.subList(2, 3)));
-                items.get(0).setStatus(itemStatuses.get(0));
-                items.get(1).setStatus(itemStatuses.get(0));
-                items.get(2).setStatus(itemStatuses.get(0));
-                List<Item> savedItems = itemRepository.saveAll(items);
-                System.out.println(savedItems);
-                // ignoring first item, since it has no auction
-                for(int i = 1; i < savedItems.size(); i++){
-                    bids.get(i - 1).setItem(savedItems.get(i));
-                }
-                bidRepository.saveAll(bids);
-            }
             if(roleRepository.findAll().isEmpty()){
                 roleRepository.saveAll(roles);
             }
@@ -212,10 +193,80 @@ public class RepositoriesInitializer {
                 users.get(3).setRoles(new HashSet<>(Arrays.asList(roles.get(2))));
                 userRepository.saveAll(users);
             }
+            if(itemCategoryRepository.findAll().isEmpty()){
+                itemCategoryRepository.saveAll(itemCategories);
+            }
+            if(itemProducerRepository.findAll().isEmpty()){
+                itemProducerRepository.saveAll(producers);
+            }
+            if(itemStatusRepository.findAll().isEmpty()){
+                itemStatusRepository.saveAll(itemStatuses);
+            }
+            if(itemRepository.findAll().isEmpty()){
+                User listedBy = userRepository.findByUsername("luki").get();
+                Set<ItemProducer> producerSet0 =  new HashSet<>(producers.subList(0, 2));
+                Set<ItemProducer> producerSet1 = new HashSet<>(producers.subList(1, 2));
+                Set<ItemProducer> producerSet2 = new HashSet<>(producers.subList(2, 3));
+
+                for(int i = 0; i < items.size(); i++){
+                    if(i % 3 == 0){
+                        items.get(i).setItemCategory(itemCategories.get(0));
+                        items.get(i).setItemProducers(producerSet0);
+                    }
+
+                    if(i % 3 == 1){
+                        items.get(i).setItemCategory(itemCategories.get(1));
+                        items.get(i).setItemProducers(producerSet1);
+                    }
+
+                    if(i % 3 == 2){
+                        items.get(i).setItemCategory(itemCategories.get(2));
+                        items.get(i).setItemProducers(producerSet2);
+                    }
+
+                    items.get(i).setStatus(itemStatuses.get(0));
+                    items.get(i).setListedBy(listedBy);
+                }
+
+                itemRepository.saveAll(items);
+            }
             if(postRepository.findAll().isEmpty()){
                 postRepository.saveAll(posts);
             }
         };
+    }
+
+    private ArrayList<Item> createMockItems(String mockData) {
+        ArrayList<Item> mockItems = new ArrayList<>();
+        String[] items = mockData.split("\n");
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, 5);
+        Date mockDate = calendar.getTime();
+        int AUCTION_FROM = 1;
+        int AUCTION_TO = 100;
+        int BIN_FROM = 101;
+        int BIN_TO = 200;
+        Float auction_price = 0f;
+        Float bin_price = 0f;
+        Random r = new Random();
+        Item tmpItem;
+
+        for(int i = 0; i < items.length; i++){
+            String[] item = items[i].split(",");
+
+            auction_price = Float.valueOf(String.format(Locale.ROOT, "%.2f", r.nextFloat() * (AUCTION_FROM - AUCTION_TO) + AUCTION_TO));
+            bin_price = Float.valueOf(String.format(Locale.ROOT, "%.2f", r.nextFloat() * (BIN_FROM - BIN_TO) + BIN_TO));
+
+            tmpItem = new Item();
+            tmpItem.setName(item[0]);
+            if(i % 2 == 0) tmpItem.setStartPrice(auction_price);
+            tmpItem.setBuyItNowPrice(bin_price);
+            tmpItem.setDescription(item[1]);
+            tmpItem.setExpirationDate(mockDate);
+            mockItems.add(tmpItem);
+        }
+
+        return mockItems;
     }
 
 }

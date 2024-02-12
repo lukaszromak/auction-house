@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import com.lukasz.auctionhouse.domain.Item;
@@ -34,6 +35,7 @@ public class ItemController {
     private StorageService storageService;
     private CustomItemValidator customItemValidator;
     private ItemMapper itemMapper;
+    private static final Integer pageSize = 20;
     @Autowired
     public ItemController(ItemService itemService,
                           UserService userService,
@@ -88,7 +90,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemResponse> getItems(
+    public Page<ItemResponse> getItems(
                             @RequestParam(name = "namePhrase", required = false) Optional<String> namePhrase,
                             @RequestParam(name = "descriptionPhrase", required = false) Optional<String> descriptionPhrase,
                             @RequestParam(name = "minPrice", required = false) Optional<Float> minPrice,
@@ -97,14 +99,12 @@ public class ItemController {
                             @RequestParam(name = "categoryPhrase", required = false) Optional<String> categoryPhrase,
                             @DateTimeFormat(pattern = "yyyy-MM-dd") @RequestParam(name = "dateMin", required = false) Optional<Date> dateMin,
                             @DateTimeFormat(pattern = "yyyy-MM-dd") @RequestParam(name = "dateMax", required = false) Optional<Date> dateMax,
-                            @RequestParam(name = "isBought", required = false) Optional<String> statusName){
+                            @RequestParam(name = "isBought", required = false) Optional<String> statusName,
+                            @RequestParam(name = "page", required = false, defaultValue = "0") Integer page){
 
-        List<Item> items = itemService.getAllItems(namePhrase, descriptionPhrase, minPrice, maxPrice, producerNames, categoryPhrase, dateMin, dateMax, statusName);
+        Page<Item> items = itemService.getAllItems(namePhrase, descriptionPhrase, minPrice, maxPrice, producerNames, categoryPhrase, dateMin, dateMax, statusName, page, pageSize);
 
-        return items
-                .stream()
-                .map(item -> itemMapper.toResponse(item))
-                .collect(Collectors.toList());
+        return items.map(itemMapper::toResponse);
     }
 
     @GetMapping("/{itemId}")

@@ -11,6 +11,9 @@ import com.lukasz.auctionhouse.exception.UserNotFoundException;
 import com.lukasz.auctionhouse.repositories.ItemRepository;
 import com.lukasz.auctionhouse.repositories.ItemSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -62,7 +65,7 @@ public class ItemService {
         Item savedItem = itemRepository.save(item);
 
         if(savedItem.getStartPrice() != null){
-            Bid bid = new Bid(null, savedItem, savedItem.getStartPrice(), null, System.currentTimeMillis());
+            Bid bid = new Bid(null, savedItem, savedItem.getStartPrice(), listingUser, System.currentTimeMillis());
             bidService.saveBid(bid);
         }
 
@@ -112,17 +115,20 @@ public class ItemService {
         return itemRepository.findById(itemId);
     }
 
-    public List<Item> getAllItems(Optional<String> namePhrase,
-                                Optional<String> descriptionPhrase,
-                                Optional<Float> minPrice,
-                                Optional<Float> maxPrice,
-                                Optional<String[]> producerNames,
-                                Optional<String> categoryPhrase,
-                                Optional<Date> dateMin,
-                                Optional<Date> dateMax,
-                                Optional<String> statusName){
-        List<Item> items;
+    public Page<Item> getAllItems(Optional<String> namePhrase,
+                                  Optional<String> descriptionPhrase,
+                                  Optional<Float> minPrice,
+                                  Optional<Float> maxPrice,
+                                  Optional<String[]> producerNames,
+                                  Optional<String> categoryPhrase,
+                                  Optional<Date> dateMin,
+                                  Optional<Date> dateMax,
+                                  Optional<String> statusName,
+                                  Integer page,
+                                  Integer pageSize){
+        Page<Item> items;
         List<Specification<Item>> specifications = new ArrayList<>();
+        Pageable pageable = PageRequest.of(page, pageSize);
 
         if(namePhrase.isPresent()){
             specifications.add(Specification.where(ItemSpecifications.findByPhrase(namePhrase.get())));
@@ -154,10 +160,11 @@ public class ItemService {
             specifications.add(Specification.where(ItemSpecifications.findByIsBought(statusName.get())));
         }
 
+
         if(specifications.isEmpty()){
-            items = itemRepository.findAll();
+            items = itemRepository.findAll(pageable);
         } else {
-            items = itemRepository.findAll(Specification.allOf(specifications));
+            items = itemRepository.findAll(Specification.allOf(specifications), pageable);
         }
 
         return items;

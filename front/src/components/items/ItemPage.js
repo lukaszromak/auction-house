@@ -180,7 +180,7 @@ function ItemPage() {
             </Row>
             <Row className="p-4">
                 <h2>Description</h2>
-                {item.description.length === 0 ? "No description provided." : <p>item.description</p>}
+                {item.description.length === 0 ? "No description provided." : <p>{item.description}</p>}
                 <h2 className="mt-5">Additional Info</h2>
                 <Row>
                     <p>Categories: {item.itemCategory}</p>

@@ -1,29 +1,58 @@
 import { useState, useEffect } from "react";
 import { Image, Container, Col, Row, Nav } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { Api } from "../misc/Api";
 import { config } from "./ImageUrl";
 import ItemsSearch from "./ItemsSearch";
+import ItemPagination from "./ItemPagination";
 
 function ItemsList() {
     const noPhotoAltImg = require("./nophoto.jpg")
+    const [urlParams, setUrlParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useState({});
+    const [numPages, setNumPages] = useState(0);
+    const [currentPage, setCurrentPage] = useState(0);
+    const [items, setItems] = useState([]);
     const status_map = {
-        "BOUGHT_BIN": "Not bought",
+        "NOT_BOUGHT": "Not bought",
         "BOUGHT_BIN": "Bought via bin",
         "BOUGHT_AUCTION": "Bought via auction"
     }
-    const [items, setItems] = useState([])
 
     useEffect(() => {
-        handleGetItems({isBought: "NOT_BOUGHT"});
+        const params = {
+            isBought: "NOT_BOUGHT"
+        };
+
+        if(urlParams.get("page") && !isNaN(urlParams.get("page"))){
+            const pageNumber = Number(urlParams.get("page")) - 1;
+            params.page = pageNumber;
+        }
+
+        setSearchParams(params);
     }, [])
 
-    const handleGetItems = async (params) => {
+    useEffect(() => {
+        if(Object.keys(searchParams).length > 0){
+            handleGetItems();
+        }
+    }, [searchParams]);
+
+    const handleGetItems = async () => {
         try {
-            const response = await Api.getItems(params);
-            const items = response.data
-            console.log(items);
-            setItems(items)
+            console.log(searchParams);
+            const response = await Api.getItems(searchParams);
+            if(response.data && response.data.pageable) {
+                const items = response.data.content;
+                const numPages = response.data.totalPages;
+                const currentPage = response.data.pageable.pageNumber;
+                setItems(items);
+                setNumPages(numPages);
+                setCurrentPage(currentPage);
+                const urlSearchParams = new URLSearchParams();
+                urlSearchParams.append("page", currentPage + 1);
+                setUrlParams(urlSearchParams);
+            }
         } catch (error) {
             console.log(error)
         }
@@ -39,11 +68,11 @@ function ItemsList() {
         <Container>
             <Row>
                 <ItemsSearch
-                    handleGetItems={handleGetItems}/>
+                    setSearchParams={setSearchParams}/>
                 <Col lg={9}>
                     {items.map(item => (
-                        <>
-                        <Row key={item.id} className="mb-3">
+                        <span key={item.id}>
+                        <Row className="mb-3">
                             <Col>
                                 <Nav.Link href={`/item/${item.id}`}>
                                     <Image
@@ -68,8 +97,12 @@ function ItemsList() {
                             </Col>
                         </Row>
                         <hr/>
-                        </>
+                        </span>
                     ))}
+                    <ItemPagination
+                        numPages={numPages}
+                        currentPage={currentPage}
+                        setSearchParams={setSearchParams}/>
                 </Col>
             </Row>
         </Container>

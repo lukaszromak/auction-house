@@ -4,7 +4,7 @@ import { MultiSelect } from "react-multi-select-component";
 import { handleGetCategories, handleGetProducers } from "../misc/ItemHelpers";
 
 function ItemsSearch(props) {
-    const {handleGetItems} = props;
+    const {setSearchParams} = props;
     const [namePhrase, setNamePhrase] = useState("");
     const [descriptionPhrase, setDescriptionPhrase] = useState("");
     const [minPrice, setMinPrice] = useState(0);
@@ -16,7 +16,6 @@ function ItemsSearch(props) {
     const [dateMin, setMinDate] = useState("");
     const [dateMax, setMaxDate] = useState("");
     const [isBought, setIsBought] = useState("");
-    const [isPending, setIsPending] = useState(false);
 
     useEffect(() => {
         handleGetCategories(setItemCategories);
@@ -24,19 +23,12 @@ function ItemsSearch(props) {
     }, [])
 
     const handleSubmit = async(event) => {
-        setIsPending(true)
         event.preventDefault();
         event.stopPropagation();
         
-        try {
-            const params = mapStateToParams();
-            console.log(params);
-            handleGetItems(params);            
-        } catch(error) {
-
-        } finally {
-            setIsPending(false);
-        }
+        const params = mapStateToParams();
+        params.page = 0;
+        setSearchParams(params);          
     }
 
     const mapStateToParams = () => {
@@ -187,7 +179,7 @@ function ItemsSearch(props) {
                     </Form.Select>
                 </Form.Group>
                 <Form.Group>
-                    <Button type="submit" disabled={isPending}>Search</Button>
+                    <Button type="submit">Search</Button>
                     <Button variant="danger" onClick={handleClearParams}>clear filters</Button>
                 </Form.Group>
             </Form>
