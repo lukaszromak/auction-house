@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Image, Container, Col, Row, Nav } from "react-bootstrap";
 import { useSearchParams } from "react-router-dom";
 import { Api } from "../misc/Api";
@@ -9,6 +9,7 @@ import ItemPagination from "./ItemPagination";
 function ItemsList() {
     const noPhotoAltImg = require("./nophoto.jpg")
     const [urlParams, setUrlParams] = useSearchParams();
+    const isBrowserChange = useRef(false);
     const [searchParams, setSearchParams] = useState({});
     const [numPages, setNumPages] = useState(0);
     const [currentPage, setCurrentPage] = useState(0);
@@ -21,7 +22,8 @@ function ItemsList() {
 
     useEffect(() => {
         const params = {
-            isBought: "NOT_BOUGHT"
+            isBought: "NOT_BOUGHT",
+            browserChange: false
         };
 
         if(urlParams.get("page") && !isNaN(urlParams.get("page"))){
@@ -38,9 +40,16 @@ function ItemsList() {
         }
     }, [searchParams]);
 
+    useEffect(() => {
+        if(isBrowserChange && urlParams.get("page") && !isNaN(urlParams.get("page"))) {
+            setSearchParams(params => ({...params, page: urlParams.get("page") - 1, browserChange: true}));
+        }
+
+        isBrowserChange.current = true;
+    }, [urlParams]);
+
     const handleGetItems = async () => {
         try {
-            console.log(searchParams);
             const response = await Api.getItems(searchParams);
             if(response.data && response.data.pageable) {
                 const items = response.data.content;
@@ -49,9 +58,12 @@ function ItemsList() {
                 setItems(items);
                 setNumPages(numPages);
                 setCurrentPage(currentPage);
-                const urlSearchParams = new URLSearchParams();
-                urlSearchParams.append("page", currentPage + 1);
-                setUrlParams(urlSearchParams);
+                if(!searchParams.browserChange) {
+                    const urlSearchParams = new URLSearchParams();
+                    urlSearchParams.append("page", currentPage + 1);
+                    isBrowserChange.current = false;
+                    setUrlParams(urlSearchParams);
+                }
             }
         } catch (error) {
             console.log(error)
@@ -70,6 +82,11 @@ function ItemsList() {
                 <ItemsSearch
                     setSearchParams={setSearchParams}/>
                 <Col lg={9}>
+                    <ItemPagination
+                            numPages={numPages}
+                            currentPage={currentPage}
+                            setSearchParams={setSearchParams}
+                            isBrowserChange={isBrowserChange}/>
                     {items.map(item => (
                         <span key={item.id}>
                         <Row className="mb-3">
@@ -102,7 +119,8 @@ function ItemsList() {
                     <ItemPagination
                         numPages={numPages}
                         currentPage={currentPage}
-                        setSearchParams={setSearchParams}/>
+                        setSearchParams={setSearchParams}
+                        isBrowserChange={isBrowserChange}/>
                 </Col>
             </Row>
         </Container>
