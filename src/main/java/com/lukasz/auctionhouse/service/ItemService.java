@@ -53,12 +53,16 @@ public class ItemService {
         }
 
         item.setId(null);
-        item.setItemCategory(itemCategoryService.getCategory(item.getItemCategory().getId()));
-        item.setItemProducers(new HashSet<>(itemProducerService.getProducers(item
-                .getItemProducers()
-                .stream()
-                .map(itemProducer -> itemProducer.getId())
-                .toList())));
+        if(item.getItemCategory() != null) {
+            item.setItemCategory(itemCategoryService.getCategory(item.getItemCategory().getId()));
+        }
+        if(item.getItemProducers() != null) {
+            item.setItemProducers(new HashSet<>(itemProducerService.getProducers(item
+                    .getItemProducers()
+                    .stream()
+                    .map(itemProducer -> itemProducer.getId())
+                    .toList())));
+        }
         item.setListedBy(listingUser);
         item.setStatus(itemStatusService.findByName("NOT_BOUGHT"));
 

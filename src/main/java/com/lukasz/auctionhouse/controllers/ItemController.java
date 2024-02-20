@@ -57,8 +57,7 @@ public class ItemController {
     @Operation(security = {@SecurityRequirement(name = "basicAuth")})
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public ItemResponse createItem(@RequestHeader(name = "Authorization") String authData,
-                           @Valid @RequestBody Item item){
+    public ItemResponse createItem(@Valid @RequestBody Item item){
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Optional<User> listingUser = userService.getByUsername(username);
         if(listingUser.isEmpty()){

@@ -147,6 +147,7 @@ public class RepositoriesInitializer {
         userList.add(new User("dzejn", "jane@example.com", passwordEncoder.encode("12342345")));
         userList.add(new User("bob2341", "bob@example.com", passwordEncoder.encode("12342345")));
         userList.add(new User("moderator", "moderator@gmail.com", passwordEncoder.encode("moderator")));
+        userList.add(new User("testuser", "testmail@gmail.com", passwordEncoder.encode("testuser123")));
 
         return userList;
     }
@@ -191,6 +192,7 @@ public class RepositoriesInitializer {
                 users.get(1).setRoles(new HashSet<>(Arrays.asList(roles.get(0))));
                 users.get(2).setRoles(new HashSet<>(Arrays.asList(roles.get(0))));
                 users.get(3).setRoles(new HashSet<>(Arrays.asList(roles.get(2))));
+                users.get(4).setRoles(new HashSet<>(Arrays.asList(roles.get(0))));
                 userRepository.saveAll(users);
             }
             if(itemCategoryRepository.findAll().isEmpty()){
