@@ -41,7 +41,7 @@ public class CustomWebSecurityConfigurerAdapter {
                         .requestMatchers(HttpMethod.GET, contextPath + "/posts").permitAll()
                         .requestMatchers( "/users/{id}/address").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(contextPath + "/reports").hasRole("ADMIN")
-                        .requestMatchers(contextPath + "/error").permitAll()
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers("/", "/index.html", "/static/**",
                                 "/*.ico", "/*.json", "/*.png", "/images/**").permitAll()
                         .anyRequest().authenticated()

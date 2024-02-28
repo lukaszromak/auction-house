@@ -1,6 +1,6 @@
 const prod = {
     url: {
-      API_BASE_URL: 'http://20.54.208.223/api'
+      API_BASE_URL: 'http://localhost:80/api'
     }
   }
   

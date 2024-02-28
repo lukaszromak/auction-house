@@ -5,6 +5,7 @@ import { Api } from "../misc/Api";
 import { config } from "./ImageUrl";
 import ItemsSearch from "./ItemsSearch";
 import ItemPagination from "./ItemPagination";
+import Countdown from "../misc/Countdown";
 
 function ItemsList() {
     const noPhotoAltImg = require("./nophoto.jpg")
@@ -14,11 +15,6 @@ function ItemsList() {
     const [numPages, setNumPages] = useState(0);
     const [currentPage, setCurrentPage] = useState(0);
     const [items, setItems] = useState([]);
-    const status_map = {
-        "NOT_BOUGHT": "Not bought",
-        "BOUGHT_BIN": "Bought via bin",
-        "BOUGHT_AUCTION": "Bought via auction"
-    }
 
     useEffect(() => {
         const params = {
@@ -110,7 +106,7 @@ function ItemsList() {
                                     {(item.startPrice && item.status === "NOT_BOUGHT") && <p>auction starting price: {item.startPrice}zł</p>}
                                     {(item.buyItNowPrice && item.status === "NOT_BOUGHT") && <p>buy it now for: {item.buyItNowPrice}zł</p>}
                                 </span>
-                                <p>expires at: {formatDate(item.expirationDate)}</p>
+                                <Countdown expirationDate={item.expirationDate}/>
                             </Col>
                         </Row>
                         <hr/>

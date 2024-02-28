@@ -3,10 +3,7 @@ package com.lukasz.auctionhouse.service;
 import com.lukasz.auctionhouse.domain.Bid;
 import com.lukasz.auctionhouse.domain.Item;
 import com.lukasz.auctionhouse.domain.User;
-import com.lukasz.auctionhouse.exception.Item.ItemBoughtException;
-import com.lukasz.auctionhouse.exception.Item.ItemExpiredException;
-import com.lukasz.auctionhouse.exception.Item.ItemNotFoundException;
-import com.lukasz.auctionhouse.exception.Item.ItemNotPricedException;
+import com.lukasz.auctionhouse.exception.Item.*;
 import com.lukasz.auctionhouse.exception.UserNotFoundException;
 import com.lukasz.auctionhouse.repositories.ItemRepository;
 import com.lukasz.auctionhouse.repositories.ItemSpecifications;
@@ -98,6 +95,10 @@ public class ItemService {
         Item item = itemOptional.get();
         User user = userOptional.get();
 
+        if(item.getListedBy().equals(user)) {
+            throw new OwnItemBuyException("You cannot buy item you own.");
+        }
+
         if(!item.getStatus().getName().equals("NOT_BOUGHT")){
             throw new ItemBoughtException(String.format("Item with id %d has been already bought.", itemId));
         }
@@ -128,6 +129,7 @@ public class ItemService {
                                   Optional<Date> dateMin,
                                   Optional<Date> dateMax,
                                   Optional<String> statusName,
+                                  Optional<Boolean> expired,
                                   Integer page,
                                   Integer pageSize){
         Page<Item> items;
@@ -162,6 +164,9 @@ public class ItemService {
         }
         if(statusName.isPresent()){
             specifications.add(Specification.where(ItemSpecifications.findByIsBought(statusName.get())));
+        }
+        if(expired.isPresent()){
+            specifications.add(Specification.where(ItemSpecifications.findByExpired(expired.get())));
         }
 
 

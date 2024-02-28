@@ -6,6 +6,7 @@ import com.lukasz.auctionhouse.domain.BidHistoric;
 import com.lukasz.auctionhouse.domain.User;
 import com.lukasz.auctionhouse.exception.*;
 import com.lukasz.auctionhouse.exception.BidExceptions.*;
+import com.lukasz.auctionhouse.exception.Item.OwnItemBuyException;
 import com.lukasz.auctionhouse.repositories.BidHistoricRepository;
 import com.lukasz.auctionhouse.repositories.BidRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +77,10 @@ public class BidService {
 
         if(bid.getItem().getExpirationDate().getTime() <= System.currentTimeMillis()){
             throw new AuctionEndedException("That auction has ended.");
+        }
+
+        if(bid.getItem().getListedBy().equals(user)) {
+            throw new OwnItemBuyException("You cannot place bid on item you listed.");
         }
 
         if(bid.getUser() != null && bid.getUser().equals(user)){

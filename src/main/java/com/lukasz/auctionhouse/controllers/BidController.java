@@ -36,13 +36,15 @@ public class BidController {
 
         Bid bid = bidOptional.get();
 
-        return new BidResponse(bid.getId(), itemMapper.toResponse(bid.getItem()), bid.getCurrentPrice(), bid.getUser().getUsername(), bid.getTimestamp());
+        return new BidResponse(bid.getId(), itemMapper.toResponse(bid.getItem()), bid.getCurrentPrice(), bid.getUser() == null ? null : bid.getUser().getUsername(), bid.getTimestamp());
     }
 
     @ResponseStatus(HttpStatus.ACCEPTED)
     @PostMapping("/placeBid")
-    private Bid placeBid(@RequestHeader("Authorization") String authData, @Valid @RequestBody BidRequest bidRequest){
-        return bidService.placeBid(bidRequest);
+    private BidResponse placeBid(@Valid @RequestBody BidRequest bidRequest){
+        Bid bid = bidService.placeBid(bidRequest);
+
+        return new BidResponse(bid.getId(), itemMapper.toResponse(bid.getItem()), bid.getCurrentPrice(), bid.getUser() == null ? null : bid.getUser().getUsername(), bid.getTimestamp());
     }
 
 }

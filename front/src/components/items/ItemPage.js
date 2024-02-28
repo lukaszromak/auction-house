@@ -4,6 +4,7 @@ import { Button, Container, Row, Col, FormControl, Alert, Figure } from "react-b
 import { Api } from "../misc/Api";
 import { useAuth } from "../context/AuthContext";
 import { config } from "./ImageUrl";
+import Countdown from "../misc/Countdown";
 
 function ItemPage() {
     const Auth = useAuth();
@@ -99,8 +100,9 @@ function ItemPage() {
 
     const handleBuyItem = async() => {
         try {
-            if(!Auth.userIsAuthenticated()){
-                setPlaceBidResponse("You need to be logged in to place bid.");
+            if(!Auth.userIsAuthenticated()) {
+                setBuyItemError(true);
+                setBuyItemErrorMessage("You need to be logged in to place bid.");
                 return;
             }
 
@@ -140,9 +142,14 @@ function ItemPage() {
                 </Col>
                 <Col md={6}>
                     {
-                    // display info about auction
+                    !buyItemSuccess && <Countdown expirationDate={item.expirationDate}/>
+                    }
+                    {
                     buyItemSuccess ?
                     <Alert variant="success">You bought the item.</Alert>
+                    :
+                    new Date().getTime() > new Date(item.expirationDate).getTime() ?
+                    <Alert variant="danger">Auction expired.</Alert>
                     :
                     (bid && item.status && item.status === "BOUGHT_AUCTION") ?
                     <Alert>That item was sold for {bid.currentPrice}zł</Alert> 
@@ -150,7 +157,7 @@ function ItemPage() {
                     bid && item.status === "NOT_BOUGHT" ?      
                     <>           
                         <h3>Current price - {bid.currentPrice}zł</h3>
-                        <h4>current winner - {bid.username}</h4>
+                        <p>{bid.username ? `current winner - ${bid.username}` : "Place first bid!"}</p>
                         {placeBidSuccess &&
                         <Alert variant="success">
                         {placeBidResponse}
@@ -160,18 +167,22 @@ function ItemPage() {
                         {placeBidResponse}
                         </Alert>}
                         <FormControl type="number" placeholder="Your offer" min={bid.currentPrice} value={offer} onChange={(e) => setOffer(e.target.value)}/>
-                        <Button className="mt-2" onClick={() => {handlePlaceBid()}}>Bid</Button>
+                        <Button className="mt-2" onClick={() => {handlePlaceBid()}}>Place bid</Button>
                     </> 
                     :
                     (!bid && item.status === "NOT_BOUGHT") && <Alert>That item has no auction.</Alert>
                     }
                     {
+                    new Date().getTime() > new Date(item.expirationDate).getTime() ?
+                    ""
+                    :
                     (item.status === "BOUGHT_BIN") ? <Alert>That item was sold for {item.buyItNowPrice}zł</Alert> 
                     :
                     (item.buyItNowPrice && item.status === "NOT_BOUGHT" && !buyItemSuccess) ?
                     <>
-                    <h3>Buy it now price - {item.buyItNowPrice}</h3> 
-                    <Button onClick={handleBuyItem}>Buy</Button>
+                        <h3>Buy it now price - {item.buyItNowPrice}zł</h3> 
+                        <Button onClick={handleBuyItem}>Buy it now</Button>
+                        {buyItemError && <Alert className="mt-3" variant="danger">{buyItemErrorMessage}</Alert>}
                     </>
                     :
                     (!item.buyItNowPrice && item.status === "NOT_BOUGHT") && <Alert className="mt-2">This item has no buy it now option.</Alert> 
