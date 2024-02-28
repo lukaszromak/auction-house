@@ -9,8 +9,8 @@ import NavbarMenu from './components/misc/NavbarMenu';
 import Footer from './components/misc/Footer';
 import Signup from './components/Signup';
 import ItemPage from './components/items/ItemPage';
-import AdminPage from './components/Admin/AdminPage';
-import ModeratorPage from './components/Moderator/ModeratorPage';
+import AdminPage from './components/admin/AdminPage';
+import ModeratorPage from './components/moderator/ModeratorPage';
 
 function App() {
   return (

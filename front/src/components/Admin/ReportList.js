@@ -14,6 +14,7 @@ function ReportList(props){
                 </Col>
                 {addReportResponseOK && <Alert>Report generation started, we will notify you via email when it's finished.</Alert>}
             </Row>
+                {reports.length === 0 ? <p>No reports.</p> :
                 <Table>
                     <thead>
                         <tr>
@@ -34,6 +35,7 @@ function ReportList(props){
                     ))}
                     </tbody>
                 </Table>
+                }
         </Container>
     );
 } 

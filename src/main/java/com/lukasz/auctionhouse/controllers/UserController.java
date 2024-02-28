@@ -2,7 +2,6 @@ package com.lukasz.auctionhouse.controllers;
 
 
 import com.lukasz.auctionhouse.domain.Address;
-import com.lukasz.auctionhouse.domain.User;
 import com.lukasz.auctionhouse.service.UserService;
 import com.lukasz.auctionhouse.validators.CustomAddressValidator;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,8 +9,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 

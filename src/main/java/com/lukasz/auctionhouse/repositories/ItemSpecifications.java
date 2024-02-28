@@ -119,4 +119,14 @@ public class ItemSpecifications {
             return null;
         };
     }
+
+    public static Specification<Item> findByExpired(final boolean expired) {
+        return (itemRoot, criteriaQuery, criteriaBuilder) -> {
+            if(expired){
+                return criteriaBuilder.lessThan(itemRoot.get(Item_.expirationDate), new Date());
+            }
+
+            return criteriaBuilder.greaterThan(itemRoot.get(Item_.expirationDate), new Date());
+        };
+    }
 }

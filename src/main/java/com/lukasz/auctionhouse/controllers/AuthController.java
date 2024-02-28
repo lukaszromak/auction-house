@@ -39,10 +39,10 @@ public class AuthController {
     @PostMapping("/signup")
     public AuthResponse signUp(@Valid @RequestBody SignUpRequest signUpRequest){
         if(userService.hasUserWithUsername(signUpRequest.getUsername())){
-            throw new DuplicatedUserInfoException("User with that username already exists.");
+            throw new DuplicatedUserInfoException("User with that email / username already exists.");
         }
         if(userService.hasUserWithEmail(signUpRequest.getEmail())){
-            throw new DuplicatedUserInfoException("User with that email already exists.");
+            throw new DuplicatedUserInfoException("User with that email / username already exists.");
         }
 
         User user = userService.createUser(createUser(signUpRequest));

@@ -206,6 +206,7 @@ public class RepositoriesInitializer {
             }
             if(itemRepository.findAll().isEmpty()){
                 User listedBy = userRepository.findByUsername("luki").get();
+                User listedBy2 = userRepository.findByUsername("dzejn").get();
                 Set<ItemProducer> producerSet0 =  new HashSet<>(producers.subList(0, 2));
                 Set<ItemProducer> producerSet1 = new HashSet<>(producers.subList(1, 2));
                 Set<ItemProducer> producerSet2 = new HashSet<>(producers.subList(2, 3));
@@ -226,11 +227,30 @@ public class RepositoriesInitializer {
                         items.get(i).setItemProducers(producerSet2);
                     }
 
-                    items.get(i).setStatus(itemStatuses.get(0));
-                    items.get(i).setListedBy(listedBy);
+                    Random r = new Random();
+
+                    if(r.nextInt(2) % 2 == 0) {
+                        items.get(i).setStatus(itemStatuses.get(0));
+                        items.get(i).setListedBy(listedBy);
+                    } else {
+                        items.get(i).setStatus(itemStatuses.get(0));
+                        items.get(i).setListedBy(listedBy2);
+                    }
                 }
 
                 itemRepository.saveAll(items);
+            }
+            if(bidRepository.findAll().isEmpty()) {
+                List<Item> savedItems = itemRepository.findAll();
+                List<Bid> bids = new ArrayList<>();
+
+                for(Item item : savedItems) {
+                    if(item.getStartPrice() != null && bidRepository.findByItemId(item.getId()).isEmpty()) {
+                        bids.add(new Bid(null, item, item.getStartPrice(), null, System.currentTimeMillis()));
+                    }
+                }
+
+                bidRepository.saveAll(bids);
             }
             if(postRepository.findAll().isEmpty()){
                 postRepository.saveAll(posts);
@@ -241,9 +261,8 @@ public class RepositoriesInitializer {
     private ArrayList<Item> createMockItems(String mockData) {
         ArrayList<Item> mockItems = new ArrayList<>();
         String[] items = mockData.split("\n");
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_MONTH, 5);
-        Date mockDate = calendar.getTime();
+        Date currentDate = new Date();
+        Date mockDate;
         int AUCTION_FROM = 1;
         int AUCTION_TO = 100;
         int BIN_FROM = 101;
@@ -264,6 +283,9 @@ public class RepositoriesInitializer {
             if(i % 2 == 0) tmpItem.setStartPrice(auction_price);
             tmpItem.setBuyItNowPrice(bin_price);
             tmpItem.setDescription(item[1]);
+
+            mockDate = new Date(currentDate.getTime() + r.nextInt(2 * 1000 * 60 * 60 * 24, 10 * 1000 * 60 * 60 * 24));
+
             tmpItem.setExpirationDate(mockDate);
             mockItems.add(tmpItem);
         }

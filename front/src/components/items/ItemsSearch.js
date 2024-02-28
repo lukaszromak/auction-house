@@ -16,6 +16,7 @@ function ItemsSearch(props) {
     const [dateMin, setMinDate] = useState("");
     const [dateMax, setMaxDate] = useState("");
     const [isBought, setIsBought] = useState("");
+    const [isExpired, setIsExpired] = useState("");
 
     useEffect(() => {
         handleGetCategories(setItemCategories);
@@ -61,6 +62,9 @@ function ItemsSearch(props) {
         if(isBought !== ""){
             params.isBought = isBought;
         }
+        if(isExpired !== ""){
+            params.isExpired = isExpired;
+        }
 
         return params;
     }
@@ -85,6 +89,8 @@ function ItemsSearch(props) {
             setMaxDate(value);
         } else if(name === "isBought"){
             setIsBought(value);
+        } else if(name === "isExpired"){
+            setIsExpired(value);
         }
     }
 
@@ -98,6 +104,7 @@ function ItemsSearch(props) {
         setMinDate("");
         setMaxDate("");
         setIsBought("");
+        setIsExpired("");
     }
 
     return (
@@ -179,6 +186,17 @@ function ItemsSearch(props) {
                     </Form.Select>
                 </Form.Group>
                 <Form.Group>
+                    <Form.Label>expired</Form.Label>
+                    <Form.Select 
+                        name="isExpired"
+                        value={isExpired}
+                        onChange={(e) => handleParamsChange(e)}>
+                        <option value={""}></option>
+                        <option value={"true"}>Yes</option>
+                        <option value={"false"}>No</option>
+                    </Form.Select>
+                </Form.Group>
+                <Form.Group className="mt-3">
                     <Button type="submit">Search</Button>
                     <Button variant="danger" onClick={handleClearParams}>clear filters</Button>
                 </Form.Group>

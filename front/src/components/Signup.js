@@ -28,14 +28,20 @@ function Signup() {
         }
     }
 
-    const handleSubmit = async (event) => {
-        const form = event.target;
-        if(form.checkValidity() === false){
-            event.preventDefault();
-            event.stopPropagation();
-        }
-        setValidated(true);
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const form = event.currentTarget;
 
+        if(form.checkValidity() === false){
+            setValidated(true);
+        } else {
+            handleCreateUser();
+        }
+
+    }
+
+    const handleCreateUser = async() => {
         const user = { username, password, email }
 
         try {
@@ -65,7 +71,7 @@ function Signup() {
                 setErrorMessage(errorMessage);
             }
         }
-  }
+    }
 
     if (isLoggedIn) {
         return <Navigate to='/' />;
@@ -73,7 +79,7 @@ function Signup() {
 
   return (
     <Container>
-        <Form noValidate validated={validated}>
+        <Form noValidate validated={validated} onSubmit={handleSubmit}>
             <Form.Group>
                 <Form.Label>Username</Form.Label>
                 <Form.Control
@@ -84,7 +90,7 @@ function Signup() {
                     minLength={4}
                     maxLength={20}
                     onChange={(e) => handleInputChange(e)}/>
-                <Form.Control.Feedback type="invalid">Enter a username with 5-20 characters.</Form.Control.Feedback>
+                <Form.Control.Feedback type="invalid">Enter a username with 4-20 characters.</Form.Control.Feedback>
             </Form.Group>
             <Form.Group>
                 <Form.Label>Email</Form.Label>
@@ -106,16 +112,16 @@ function Signup() {
                     minLength={4}
                     maxLength={20}
                     onChange={(e) => handleInputChange(e)}/>
-                <Form.Control.Feedback type="invalid">Enter password with 5-20 characters</Form.Control.Feedback>
+                <Form.Control.Feedback type="invalid">Enter password with 4-20 characters</Form.Control.Feedback>
             </Form.Group>
+            <Button type="submit" className="mb-3 mt-3">Register</Button>
         </Form>
-        <Button onClick={(e) => handleSubmit(e)}>Register</Button>
         {isError &&
         <Alert variant="danger">
             {errorMessage}    
         </Alert>}
         <Alert>{`Already have an accout? `}
-          <NavLink to="/login" as={NavLink} color='teal'>Login Up</NavLink>
+          <NavLink to="/login" as={NavLink} color='teal'>Login</NavLink>
         </Alert>
     </Container>
   );

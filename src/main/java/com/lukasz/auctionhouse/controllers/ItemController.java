@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/items")
@@ -99,9 +98,10 @@ public class ItemController {
                             @DateTimeFormat(pattern = "yyyy-MM-dd") @RequestParam(name = "dateMin", required = false) Optional<Date> dateMin,
                             @DateTimeFormat(pattern = "yyyy-MM-dd") @RequestParam(name = "dateMax", required = false) Optional<Date> dateMax,
                             @RequestParam(name = "isBought", required = false) Optional<String> statusName,
+                            @RequestParam(name = "isExpired", required = false) Optional<Boolean> expired,
                             @RequestParam(name = "page", required = false, defaultValue = "0") Integer page){
 
-        Page<Item> items = itemService.getAllItems(namePhrase, descriptionPhrase, minPrice, maxPrice, producerNames, categoryPhrase, dateMin, dateMax, statusName, page, pageSize);
+        Page<Item> items = itemService.getAllItems(namePhrase, descriptionPhrase, minPrice, maxPrice, producerNames, categoryPhrase, dateMin, dateMax, statusName, expired, page, pageSize);
 
         return items.map(itemMapper::toResponse);
     }
@@ -119,7 +119,7 @@ public class ItemController {
     @Operation(security = {@SecurityRequirement(name = "basicAuth")})
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{itemId}/buy")
-    public ResponseEntity buyItem(@RequestHeader("Authorization") String authData, @PathVariable(name = "itemId") Long itemId){
+    public ResponseEntity buyItem(@PathVariable(name = "itemId") Long itemId) {
         itemService.buyItem(itemId);
         return ResponseEntity.ok("Successfully bought item");
     }
